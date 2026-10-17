@@ -1,0 +1,43 @@
+using System;
+using Android.App;
+using Android.Content;
+using Android.Content.PM;
+using Android.OS;
+
+namespace OpenRA.Android
+{
+	[Activity(
+		Name = "org.openra.android.LauncherActivity",
+		Label = "OpenRA",
+		Icon = "@mipmap/app_icon",
+		RoundIcon = "@mipmap/app_icon",
+		MainLauncher = true,
+		NoHistory = true,
+		ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.UiMode | ConfigChanges.KeyboardHidden,
+		ScreenOrientation = ScreenOrientation.SensorLandscape,
+		Theme = "@android:style/Theme.NoTitleBar.Fullscreen")]
+	public class LauncherActivity : Activity
+	{
+		protected override void OnCreate(Bundle savedInstanceState)
+		{
+			base.OnCreate(savedInstanceState);
+			Console.WriteLine("[LauncherActivity] Starting OpenRA launcher...");
+
+			try
+			{
+				AndroidGameBridge.RegisterJniMethods();
+
+				var intent = new Intent();
+				intent.SetClassName(this, "org.libsdl.app.SDLActivity");
+				intent.AddFlags(ActivityFlags.ForwardResult);
+				StartActivity(intent);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"[LauncherActivity] Launch failed: {ex}");
+			}
+
+			Finish();
+		}
+	}
+}

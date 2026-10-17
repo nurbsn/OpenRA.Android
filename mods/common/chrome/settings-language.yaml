@@ -1,0 +1,71 @@
+Container@LANGUAGE_PANEL:
+	Logic: LanguageSettingsLogic
+	Width: PARENT_WIDTH
+	Height: PARENT_HEIGHT
+	Children:
+		ScrollPanel@SETTINGS_SCROLLPANEL:
+			Width: PARENT_WIDTH
+			Height: PARENT_HEIGHT
+			CollapseHiddenChildren: True
+			TopBottomSpacing: 5
+			ItemSpacing: 10
+			Children:
+				Background@LANGUAGE_SECTION_HEADER:
+					X: 5
+					Width: PARENT_WIDTH - 24 - 10
+					Height: 13
+					Background: separator
+					ClickThrough: True
+					Children:
+						Label@LABEL:
+							Width: PARENT_WIDTH
+							Height: PARENT_HEIGHT
+							Font: TinyBold
+							Align: Center
+							Text: label-language-section-header
+				Container@ROW_LANGUAGE:
+					Width: PARENT_WIDTH - 24
+					Height: 35
+					Children:
+						Label@LANGUAGE_DESC:
+							X: 10
+							Y: 5
+							Width: 180
+							Height: 25
+							Text: label-select-language
+							Font: Bold
+						DropDownButton@LANGUAGE_DROPDOWN:
+							X: 200
+							Y: 0
+							Width: 260
+							Height: 35
+							Font: Bold
+				Container@ROW_BUTTONS:
+					Width: PARENT_WIDTH - 24
+					Height: 40
+					Children:
+						Button@BUTTON_LANG_EN:
+							X: 10
+							Y: 0
+							Width: 210
+							Height: 35
+							Text: button-language-en
+							Font: Bold
+						Button@BUTTON_LANG_PL:
+							X: 230
+							Y: 0
+							Width: 210
+							Height: 35
+							Text: button-language-pl
+							Font: Bold
+				Container@ROW_INFO:
+					Width: PARENT_WIDTH - 24
+					Height: 80
+					Children:
+						Label@LANGUAGE_INFO:
+							X: 10
+							Y: 5
+							Width: PARENT_WIDTH - 20
+							Height: 70
+							WordWrap: true
+							Text: label-language-restart-info

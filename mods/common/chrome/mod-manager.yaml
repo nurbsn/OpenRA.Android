@@ -1,0 +1,237 @@
+Background@MOD_MANAGER_PANEL:
+	Logic: ModManagerLogic
+	X: (WINDOW_WIDTH - WIDTH) / 2
+	Y: (WINDOW_HEIGHT - HEIGHT) / 2
+	Width: 900
+	Height: 600
+	Children:
+		Label@TITLE:
+			Y: 18
+			Width: PARENT_WIDTH
+			Height: 25
+			Text: label-mod-manager-title
+			Align: Center
+			Font: Bold
+		Container@TAB_CONTAINER:
+			X: 20
+			Y: 50
+			Width: PARENT_WIDTH - 40
+			Height: 35
+			Children:
+				Button@TAB_MODS:
+					X: 0
+					Y: 0
+					Width: 280
+					Height: 35
+					Text: button-tab-installed-mods
+					Font: Bold
+				Button@TAB_DOWNLOAD:
+					X: 290
+					Y: 0
+					Width: 280
+					Height: 35
+					Text: button-tab-download-mods
+					Font: Bold
+				Button@TAB_STORAGE:
+					X: 580
+					Y: 0
+					Width: 280
+					Height: 35
+					Text: button-tab-storage-folder
+					Font: Bold
+		Container@PANEL_CONTAINER:
+			X: 20
+			Y: 95
+			Width: PARENT_WIDTH - 40
+			Height: PARENT_HEIGHT - 155
+			Children:
+				Container@PANEL_MODS:
+					Width: PARENT_WIDTH
+					Height: PARENT_HEIGHT
+					Children:
+						ScrollPanel@MOD_LIST:
+							X: 0
+							Y: 0
+							Width: PARENT_WIDTH
+							Height: PARENT_HEIGHT - 45
+							Children:
+								ScrollItem@MOD_TEMPLATE:
+									Width: PARENT_WIDTH - 24
+									Height: 48
+									Visible: false
+									Children:
+										Label@TITLE:
+											X: 12
+											Y: 6
+											Width: 380
+											Height: 20
+											Font: Bold
+										Label@ID_VERSION:
+											X: 12
+											Y: 26
+											Width: 380
+											Height: 18
+											Font: Tiny
+										Label@STATUS:
+											X: 410
+											Y: 14
+											Width: 160
+											Height: 20
+											Font: Bold
+										Button@SWITCH_BUTTON:
+											X: PARENT_WIDTH - 150
+											Y: 8
+											Width: 140
+											Height: 32
+											Font: Bold
+						Button@REFRESH_BUTTON:
+							X: 0
+							Y: PARENT_HEIGHT - 38
+							Width: 180
+							Height: 35
+							Text: button-refresh-list
+							Font: Bold
+				Container@PANEL_DOWNLOAD:
+					Width: PARENT_WIDTH
+					Height: PARENT_HEIGHT
+					Visible: false
+					Children:
+						Label@DOWNLOAD_DESC:
+							X: 0
+							Y: 5
+							Width: PARENT_WIDTH
+							Height: 20
+							Text: label-download-desc
+							Font: Bold
+						TextField@URL_INPUT:
+							X: 0
+							Y: 35
+							Width: PARENT_WIDTH - 150
+							Height: 35
+						Button@PASTE_BUTTON:
+							X: PARENT_WIDTH - 140
+							Y: 35
+							Width: 140
+							Height: 35
+							Text: button-paste-link
+							Font: Bold
+						Button@DOWNLOAD_BUTTON:
+							X: 0
+							Y: 80
+							Width: 220
+							Height: 38
+							Text: button-download-install
+							Font: Bold
+						ProgressBar@PROGRESS_BAR:
+							X: 0
+							Y: 130
+							Width: PARENT_WIDTH
+							Height: 22
+						Label@STATUS_LABEL:
+							X: 0
+							Y: 160
+							Width: PARENT_WIDTH
+							Height: 25
+							Text: label-ready-download
+							Font: Regular
+						Label@PRESETS_LABEL:
+							X: 0
+							Y: 205
+							Width: PARENT_WIDTH
+							Height: 20
+							Text: label-popular-mods
+							Font: Bold
+						Button@PRESET_CA:
+							X: 0
+							Y: 235
+							Width: 270
+							Height: 35
+							Text: Combined Arms
+						Button@PRESET_RV:
+							X: 285
+							Y: 235
+							Width: 270
+							Height: 35
+							Text: Romanov's Vengeance
+						Button@PRESET_SP:
+							X: 570
+							Y: 235
+							Width: 270
+							Height: 35
+							Text: Shattered Paradise
+				Container@PANEL_STORAGE:
+					Width: PARENT_WIDTH
+					Height: PARENT_HEIGHT
+					Visible: false
+					Children:
+						Label@STORAGE_DESC_1:
+							X: 0
+							Y: 5
+							Width: PARENT_WIDTH
+							Height: 20
+							Text: label-storage-desc-1
+							Font: Bold
+						Label@STORAGE_DESC_2:
+							X: 0
+							Y: 28
+							Width: PARENT_WIDTH
+							Height: 38
+							WordWrap: true
+							Text: label-storage-desc-2
+						TextField@PATH_INPUT:
+							X: 0
+							Y: 75
+							Width: PARENT_WIDTH
+							Height: 35
+						Label@PRESETS_STORAGE_LABEL:
+							X: 0
+							Y: 120
+							Width: PARENT_WIDTH
+							Height: 20
+							Text: label-storage-presets
+							Font: Bold
+						Button@PRESET_SHARED:
+							X: 0
+							Y: 150
+							Width: PARENT_WIDTH
+							Height: 35
+							Text: button-storage-shared
+						Button@PRESET_DOWNLOAD:
+							X: 0
+							Y: 195
+							Width: PARENT_WIDTH
+							Height: 35
+							Text: button-storage-download
+						Button@PRESET_DOCUMENTS:
+							X: 0
+							Y: 240
+							Width: PARENT_WIDTH
+							Height: 35
+							Text: button-storage-documents
+						Button@PRESET_DEFAULT:
+							X: 0
+							Y: 285
+							Width: PARENT_WIDTH
+							Height: 35
+							Text: button-storage-default
+						Button@APPLY_STORAGE_BUTTON:
+							X: 0
+							Y: 335
+							Width: 260
+							Height: 38
+							Text: button-save-create-folders
+							Font: Bold
+						Label@STORAGE_STATUS_LABEL:
+							X: 280
+							Y: 342
+							Width: PARENT_WIDTH - 280
+							Height: 25
+							Font: Regular
+		Button@CLOSE_BUTTON:
+			Key: escape
+			X: PARENT_WIDTH - 180
+			Y: PARENT_HEIGHT - 45
+			Width: 160
+			Height: 35
+			Text: button-close
+			Font: Bold

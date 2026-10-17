@@ -1,0 +1,62 @@
+#region Copyright & License Information
+/*
+ * Copyright (c) The OpenRA Developers and Contributors
+ * This file is part of OpenRA, which is free software. It is made
+ * available to you under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version. For more
+ * information, see COPYING.
+ */
+#endregion
+
+using System.Numerics;
+using OpenRA.Graphics;
+using OpenRA.Primitives;
+
+namespace OpenRA.Mods.Common.Graphics
+{
+	public class SelectionBoxAnnotationRenderable : IRenderable, IFinalizedRenderable
+	{
+		readonly Rectangle decorationBounds;
+		readonly Color color;
+
+		public SelectionBoxAnnotationRenderable(Actor actor, Rectangle decorationBounds, Color color)
+			: this(actor.CenterPosition, decorationBounds, color) { }
+
+		public SelectionBoxAnnotationRenderable(WPos pos, Rectangle decorationBounds, Color color)
+		{
+			Pos = pos;
+			this.decorationBounds = decorationBounds;
+			this.color = color;
+		}
+
+		public WPos Pos { get; }
+
+		public int ZOffset => 0;
+		public bool IsDecoration => true;
+
+		public IRenderable WithZOffset(int newOffset) { return this; }
+		public IRenderable OffsetBy(in WVec vec) { return new SelectionBoxAnnotationRenderable(Pos + vec, decorationBounds, color); }
+		public IRenderable AsDecoration() { return this; }
+
+		public IFinalizedRenderable PrepareRender(WorldRenderer wr) { return this; }
+		public void Render(WorldRenderer wr)
+		{
+			var tl = wr.Viewport.WorldToViewPx(new Vector3(decorationBounds.Left, decorationBounds.Top, 0)).ToVector3();
+			var br = wr.Viewport.WorldToViewPx(new Vector3(decorationBounds.Right, decorationBounds.Bottom, 0)).ToVector3();
+			var tr = new Vector3(br.X, tl.Y, 0);
+			var bl = new Vector3(tl.X, br.Y, 0);
+			var u = new Vector3(4, 0, 0);
+			var v = new Vector3(0, 4, 0);
+
+			var cr = Game.Renderer.RgbaColorRenderer;
+			cr.DrawLine([tl + u, tl, tl + v], 1, color, true);
+			cr.DrawLine([tr - u, tr, tr + v], 1, color, true);
+			cr.DrawLine([br - u, br, br - v], 1, color, true);
+			cr.DrawLine([bl + u, bl, bl - v], 1, color, true);
+		}
+
+		public void RenderDebugGeometry(WorldRenderer wr) { }
+		public Rectangle ScreenBounds(WorldRenderer wr) { return Rectangle.Empty; }
+	}
+}

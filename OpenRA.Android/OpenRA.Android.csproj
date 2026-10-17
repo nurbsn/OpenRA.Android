@@ -1,0 +1,101 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>24.0</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>disable</Nullable>
+    <ApplicationId>org.openra.android</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationTitle>OpenRA</ApplicationTitle>
+    <RootNamespace>OpenRA.Android</RootNamespace>
+    <AssemblyName>OpenRA.Android</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <LangVersion>13</LangVersion>
+    <RuntimeIdentifiers>android-x64;android-arm64</RuntimeIdentifiers>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <AndroidApplication>True</AndroidApplication>
+    <AndroidGenerateManagedBindings>false</AndroidGenerateManagedBindings>
+    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+    <NoWarn>$(NoWarn);SA1518;SA1633;SA1101;SA1300;SA1600;CS1591;CA1416;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenRA.Game\OpenRA.Game.csproj" />
+    <ProjectReference Include="..\OpenRA.Platforms.Default\OpenRA.Platforms.Default.csproj" />
+    <ProjectReference Include="..\OpenRA.Mods.Common\OpenRA.Mods.Common.csproj" />
+    <ProjectReference Include="..\OpenRA.Mods.Cnc\OpenRA.Mods.Cnc.csproj" />
+    <ProjectReference Include="..\OpenRA.Mods.D2k\OpenRA.Mods.D2k.csproj" />
+    <Reference Include="OpenRA.Game">
+      <HintPath>..\bin\OpenRA.Game.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenRA.Platforms.Default">
+      <HintPath>..\bin\OpenRA.Platforms.Default.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenRA.Mods.Common">
+      <HintPath>..\bin\OpenRA.Mods.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenRA.Mods.Cnc">
+      <HintPath>..\bin\OpenRA.Mods.Cnc.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenRA.Mods.D2k">
+      <HintPath>..\bin\OpenRA.Mods.D2k.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidNativeLibrary Include="libs\arm64-v8a\libSDL2.so">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\arm64-v8a\libopenal.so">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\arm64-v8a\libfreetype.so">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\arm64-v8a\liblua51.so">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\x86_64\libSDL2.so">
+      <Abi>x86_64</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\x86_64\libopenal.so">
+      <Abi>x86_64</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\x86_64\libfreetype.so">
+      <Abi>x86_64</Abi>
+    </AndroidNativeLibrary>
+    <AndroidNativeLibrary Include="libs\x86_64\liblua51.so">
+      <Abi>x86_64</Abi>
+    </AndroidNativeLibrary>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="assets\openra-data.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidLibrary Include="libs\sdl2.jar" Bind="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\**\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <Compile Remove="bin\**" />
+  </ItemGroup>
+  <Target Name="DisableBindingsGeneration" AfterTargets="_SetAndroidGenerateManagedBindings">
+    <PropertyGroup>
+      <_AndroidGenerateManagedBindings>false</_AndroidGenerateManagedBindings>
+    </PropertyGroup>
+    <ItemGroup>
+      <_LibrariesToBind Remove="@(_LibrariesToBind)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="RemoveGeneratedBindingsBeforeCompile" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Compile Remove="$(IntermediateOutputPath)**\*.cs" />
+      <Compile Remove="$(GeneratedOutputPath)**\*.cs" />
+    </ItemGroup>
+  </Target>
+</Project>
