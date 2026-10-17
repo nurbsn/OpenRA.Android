@@ -7,8 +7,8 @@ using Android.OS;
 namespace OpenRA.Android
 {
 	[Activity(
-		Name = "org.openra.android.LauncherActivity",
-		Label = "OpenRA",
+		Name = "eu.gfmm.nopenra.LauncherActivity",
+		Label = "nOpenRA Mobile",
 		Icon = "@mipmap/app_icon",
 		RoundIcon = "@mipmap/app_icon",
 		MainLauncher = true,

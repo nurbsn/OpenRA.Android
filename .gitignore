@@ -50,3 +50,8 @@ update.log
 
 # IntelliJ files
 .idea
+
+# Android Signing & Google Play API Credentials
+*.keystore
+*.jks
+gen-lang-client-*.json
