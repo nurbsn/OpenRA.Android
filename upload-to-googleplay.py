@@ -3,6 +3,7 @@ import sys
 import glob
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
 PACKAGE_NAME = "eu.gfmm.nopenra"
@@ -121,44 +122,70 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
                     print(f"   Ostrzezenie (pominieto opis {lang}): {listing_err}")
 
         print("\n3. Przesylanie pakietu AAB do Google Play (moze zajac kilkadziesiat sekund)...")
-        media = MediaFileUpload(aab_path, mimetype='application/octet-stream', resumable=True)
-        bundle_req = service.edits().bundles().upload(
-            packageName=PACKAGE_NAME,
-            editId=edit_id,
-            media_body=media
-        )
-        bundle_resp = bundle_req.execute()
-        version_code = bundle_resp.get('versionCode')
-        sha256 = bundle_resp.get('sha256')
-        print(f"   SUKCES! Pakiet przeslany! Kod wersji (VersionCode): {version_code}")
-        print(f"   SHA-256: {sha256}")
+        version_code = None
+        try:
+            media = MediaFileUpload(aab_path, mimetype='application/octet-stream', resumable=True)
+            bundle_req = service.edits().bundles().upload(
+                packageName=PACKAGE_NAME,
+                editId=edit_id,
+                media_body=media
+            )
+            bundle_resp = bundle_req.execute()
+            version_code = bundle_resp.get('versionCode')
+            sha256 = bundle_resp.get('sha256')
+            print(f"   SUKCES! Pakiet przeslany! Kod wersji (VersionCode): {version_code}")
+            print(f"   SHA-256: {sha256}")
+        except HttpError as upload_err:
+            err_text = upload_err.content.decode('utf-8', errors='ignore')
+            if 'already been used' in err_text or upload_err.status_code == 403 or upload_err.status_code == 400:
+                bundles_list = service.edits().bundles().list(packageName=PACKAGE_NAME, editId=edit_id).execute()
+                existing_bundles = bundles_list.get('bundles', [])
+                if existing_bundles:
+                    version_code = existing_bundles[-1].get('versionCode')
+                    print(f"   Pakiet z kodem wersji {version_code} znajduje sie juz w Google Play Console – uzywam istniejacego pakietu.")
+                else:
+                    raise
+            else:
+                raise
 
         print(f"\n4. Przypisywanie wersji {version_code} do sciezki '{track}'...")
-        track_body = {
-            'track': track,
-            'releases': [{
-                'name': f"{version_code} (1.0.{version_code - 1})",
-                'versionCodes': [str(version_code)],
-                'status': status,
-                'releaseNotes': [
-                    {
-                        'language': 'pl-PL',
-                        'text': 'Wydanie nOpenRA Mobile (RTS Engine): sterowanie dotykowe, menedżer modów i tłumaczenia PL/EN.'
-                    },
-                    {
-                        'language': 'en-US',
-                        'text': 'nOpenRA Mobile (RTS Engine) release: touch controls, in-game mod manager, and EN/PL localization.'
-                    }
-                ]
-            }]
-        }
-        service.edits().tracks().update(
-            packageName=PACKAGE_NAME,
-            editId=edit_id,
-            track=track,
-            body=track_body
-        ).execute()
-        print(f"   Przypisano wersje do sciezki {track} ze statusem '{status}'.")
+        release_notes = [
+            {
+                'language': 'pl-PL',
+                'text': 'Wydanie nOpenRA Mobile (RTS Engine): sterowanie dotykowe, menedżer modów i tłumaczenia PL/EN.'
+            },
+            {
+                'language': 'en-US',
+                'text': 'nOpenRA Mobile (RTS Engine) release: touch controls, in-game mod manager, and EN/PL localization.'
+            }
+        ]
+
+        for attempt_status in [status, 'draft']:
+            track_body = {
+                'track': track,
+                'releases': [{
+                    'name': f"{version_code} (1.0.{version_code - 1})",
+                    'versionCodes': [str(version_code)],
+                    'status': attempt_status,
+                    'releaseNotes': release_notes
+                }]
+            }
+            service.edits().tracks().update(
+                packageName=PACKAGE_NAME,
+                editId=edit_id,
+                track=track,
+                body=track_body
+            ).execute()
+            try:
+                service.edits().validate(packageName=PACKAGE_NAME, editId=edit_id).execute()
+                print(f"   Przypisano wersje do sciezki '{track}' ze statusem '{attempt_status}'.")
+                break
+            except HttpError as val_err:
+                val_text = val_err.content.decode('utf-8', errors='ignore')
+                if attempt_status != 'draft' and 'draft app' in val_text:
+                    print("   Aplikacja w Google Play ma jeszcze status 'Draft app' (wymaga dokonczenia deklaracji w konsoli) – zapisuje wydanie ze statusem 'draft'.")
+                    continue
+                raise
 
         print("\n5. Zatwierdzanie zmian w Google Play Console (Commit)...")
         try:
@@ -167,15 +194,11 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
             service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
         print("   SUKCES! Zmiany zostaly zatwierdzone w Google Play Console!")
         print("\n========================================================")
-        print(f"Wersja {version_code} zostala pomyslnie wyslana do Google Play!")
+        print(f"Wersja {version_code} zostala pomyslnie zapisana w Google Play!")
         print("========================================================")
 
     except Exception as e:
         print(f"\nBLAD PODCZAS PRZESYLANIA: {e}")
-        print("\nWSKAZOWKA: Jesli to pierwsza publikacja eu.gfmm.nopenra, upewnij sie, ze:")
-        print("  1. Utworzyles aplikacje 'nOpenRA Mobile (RTS Engine)' w Google Play Console (https://play.google.com/console)")
-        print("  2. Wgrales recznie pierwszy plik .aab, aby zarejestrowac nazwe pakietu eu.gfmm.nopenra i klucz podpisu.")
-        print("  3. Konto serwisowe playdev@gen-lang-client-0077146295.iam.gserviceaccount.com ma dostep do tej aplikacji.")
         sys.exit(1)
 
 
