@@ -343,6 +343,7 @@ namespace OpenRA
 
 		public static RunStatus InitializeAndRun(string[] args)
 		{
+			state = RunStatus.Running;
 			Initialize(new Arguments(args));
 
 			// Proactively collect memory during loading to reduce peak memory.
@@ -352,6 +353,7 @@ namespace OpenRA
 
 		static void Initialize(Arguments args)
 		{
+			state = RunStatus.Running;
 			var engineDirArg = args.GetValue("Engine.EngineDir", null);
 			if (!string.IsNullOrEmpty(engineDirArg))
 				Platform.OverrideEngineDir(engineDirArg);
@@ -1060,14 +1062,21 @@ namespace OpenRA
 			{
 				// Ensure that the active replay is properly saved
 				OrderManager?.Dispose();
+				OrderManager = null;
 			}
 
 			worldRenderer?.Dispose();
-			ModData.Dispose();
+			worldRenderer = null;
+			Cursor?.Dispose();
+			Cursor = null;
+			ModData?.Dispose();
+			ModData = null;
 			ChromeProvider.Deinitialize();
 
-			Sound.Dispose();
-			Renderer.Dispose();
+			Sound?.Dispose();
+			Sound = null;
+			Renderer?.Dispose();
+			Renderer = null;
 
 			OnQuit();
 

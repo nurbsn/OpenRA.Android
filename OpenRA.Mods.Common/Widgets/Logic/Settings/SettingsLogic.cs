@@ -129,6 +129,22 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 					if (!Game.ExternalMods.TryGetValue(ExternalMod.MakeKey(Game.ModData.Manifest), out var external))
 					{
+						if (OperatingSystem.IsAndroid())
+						{
+							ConfirmationDialogs.ButtonPrompt(modData,
+								title: RestartTitle,
+								text: RestartPrompt,
+								onConfirm: () =>
+								{
+									Ui.CloseWindow();
+									Game.RunAfterTick(() => Game.InitializeMod(Game.ModData.Manifest, Arguments.Empty));
+								},
+								confirmText: RestartAccept,
+								onCancel: CloseAndExit,
+								cancelText: RestartCancel);
+							return;
+						}
+
 						NoRestart();
 						return;
 					}
