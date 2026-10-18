@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <Nullable>disable</Nullable>
     <ApplicationId>eu.gfmm.nopenra</ApplicationId>
-    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationVersion>2</ApplicationVersion>
     <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
     <ApplicationTitle>nOpenRA Mobile</ApplicationTitle>
     <RootNamespace>OpenRA.Android</RootNamespace>
@@ -19,6 +19,10 @@
     <AndroidApplication>True</AndroidApplication>
     <AndroidGenerateManagedBindings>false</AndroidGenerateManagedBindings>
     <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+    <PublishTrimmed>false</PublishTrimmed>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <AndroidLinkMode>None</AndroidLinkMode>
     <NoWarn>$(NoWarn);SA1518;SA1633;SA1101;SA1300;SA1600;CS1591;CA1416;CS0618;XA0141;XA4301</NoWarn>
   </PropertyGroup>
 
@@ -28,21 +32,6 @@
     <ProjectReference Include="..\OpenRA.Mods.Common\OpenRA.Mods.Common.csproj" />
     <ProjectReference Include="..\OpenRA.Mods.Cnc\OpenRA.Mods.Cnc.csproj" />
     <ProjectReference Include="..\OpenRA.Mods.D2k\OpenRA.Mods.D2k.csproj" />
-    <Reference Include="OpenRA.Game">
-      <HintPath>..\bin\OpenRA.Game.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenRA.Platforms.Default">
-      <HintPath>..\bin\OpenRA.Platforms.Default.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenRA.Mods.Common">
-      <HintPath>..\bin\OpenRA.Mods.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenRA.Mods.Cnc">
-      <HintPath>..\bin\OpenRA.Mods.Cnc.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenRA.Mods.D2k">
-      <HintPath>..\bin\OpenRA.Mods.D2k.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
@@ -97,5 +86,8 @@
       <Compile Remove="$(IntermediateOutputPath)**\*.cs" />
       <Compile Remove="$(GeneratedOutputPath)**\*.cs" />
     </ItemGroup>
+  </Target>
+  <Target Name="ClearReadOnlyJavaClasses" BeforeTargets="_CompileJava" Condition="Exists('$(IntermediateOutputPath)android\bin\classes')">
+    <Exec Command="attrib -r &quot;$(IntermediateOutputPath)android\bin\classes\*.*&quot; /s /d" IgnoreExitCode="true" />
   </Target>
 </Project>

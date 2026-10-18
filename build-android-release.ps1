@@ -96,15 +96,23 @@ if (Test-Path $objDir) {
 
 $binAndroidDir = Join-Path $scriptDir "bin\net10.0-android"
 if (Test-Path $binAndroidDir) {
-	Get-ChildItem -Path $binAndroidDir -Filter "*.aab" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+	Get-ChildItem -Path $binAndroidDir -Include "*.aab","*.apk" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
 }
 
-Write-Host "`nKompilacja i publikacja do Android App Bundle (AAB)..." -ForegroundColor Cyan
+Write-Host "`nKompilacja i publikacja do Android App Bundle (AAB) oraz APK..." -ForegroundColor Cyan
 Write-Host "Klucz: $keystoreFullPath" -ForegroundColor Gray
 Write-Host "Alias: $KeyAlias" -ForegroundColor Gray
 
 dotnet publish "$projectPath" -f net10.0-android -c Release `
 	-p:AndroidPackageFormat=aab `
+	-p:AndroidKeyStore=true `
+	-p:AndroidSigningKeyStore="$keystoreFullPath" `
+	-p:AndroidSigningKeyAlias=$KeyAlias `
+	-p:AndroidSigningKeyPass=$Password `
+	-p:AndroidSigningStorePass=$Password
+
+dotnet publish "$projectPath" -f net10.0-android -c Release `
+	-p:AndroidPackageFormat=apk `
 	-p:AndroidKeyStore=true `
 	-p:AndroidSigningKeyStore="$keystoreFullPath" `
 	-p:AndroidSigningKeyAlias=$KeyAlias `

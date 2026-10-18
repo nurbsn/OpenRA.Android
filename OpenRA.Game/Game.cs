@@ -581,12 +581,22 @@ namespace OpenRA
 			if (Settings?.Game != null && !string.IsNullOrWhiteSpace(Settings.Game.CustomContentPath))
 				return Settings.Game.CustomContentPath;
 
-			// Default for Android: shared user storage
+			// Default for Android: try shared user storage first, fallback to app external SupportDir/Content under Scoped Storage
 			if (OperatingSystem.IsAndroid() || Directory.Exists("/storage/emulated/0"))
 			{
 				var sharedDir = "/storage/emulated/0/OpenRA";
-				if (Directory.Exists("/storage/emulated/0"))
+				try
+				{
+					if (Directory.Exists(sharedDir))
+						return sharedDir;
+					Directory.CreateDirectory(sharedDir);
 					return sharedDir;
+				}
+				catch
+				{
+					// Scoped Storage (Android 11+ without MANAGE_EXTERNAL_STORAGE) blocks root /storage/emulated/0/OpenRA;
+					// fallback to app-specific external storage which is always writable.
+				}
 			}
 
 			return Path.Combine(Platform.SupportDir, "Content");
