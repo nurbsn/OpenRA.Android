@@ -25,38 +25,84 @@ Container@LANGUAGE_PANEL:
 							Text: label-language-section-header
 				Container@ROW_LANGUAGE:
 					Width: PARENT_WIDTH - 24
-					Height: 35
+					Height: 40
 					Children:
 						Label@LANGUAGE_DESC:
 							X: 10
-							Y: 5
+							Y: 7
 							Width: 180
 							Height: 25
 							Text: label-select-language
 							Font: Bold
 						DropDownButton@LANGUAGE_DROPDOWN:
 							X: 200
-							Y: 0
+							Y: 2
 							Width: 260
 							Height: 35
 							Font: Bold
-				Container@ROW_BUTTONS:
+				Container@ROW_BUTTONS_1:
 					Width: PARENT_WIDTH - 24
 					Height: 40
 					Children:
 						Button@BUTTON_LANG_EN:
 							X: 10
-							Y: 0
-							Width: 210
+							Y: 2
+							Width: 130
 							Height: 35
 							Text: button-language-en
 							Font: Bold
 						Button@BUTTON_LANG_PL:
-							X: 230
-							Y: 0
-							Width: 210
+							X: 150
+							Y: 2
+							Width: 130
 							Height: 35
 							Text: button-language-pl
+							Font: Bold
+						Button@BUTTON_LANG_DE:
+							X: 290
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-de
+							Font: Bold
+						Button@BUTTON_LANG_ES:
+							X: 430
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-es
+							Font: Bold
+				Container@ROW_BUTTONS_2:
+					Width: PARENT_WIDTH - 24
+					Height: 40
+					Children:
+						Button@BUTTON_LANG_FR:
+							X: 10
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-fr
+							Font: Bold
+						Button@BUTTON_LANG_PT:
+							X: 150
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-pt
+							Font: Bold
+						Button@BUTTON_LANG_IT:
+							X: 290
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-it
+							Font: Bold
+						Button@BUTTON_LANG_RU:
+							X: 430
+							Y: 2
+							Width: 130
+							Height: 35
+							Text: button-language-ru
 							Font: Bold
 				Container@ROW_INFO:
 					Width: PARENT_WIDTH - 24
@@ -64,8 +110,8 @@ Container@LANGUAGE_PANEL:
 					Children:
 						Label@LANGUAGE_INFO:
 							X: 10
-							Y: 5
+							Y: 10
 							Width: PARENT_WIDTH - 20
-							Height: 70
+							Height: 65
 							WordWrap: true
 							Text: label-language-restart-info

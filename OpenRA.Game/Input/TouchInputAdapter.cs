@@ -30,21 +30,55 @@ namespace OpenRA
 			if (Game.OrderManager?.World == null || Game.OrderManager.World.Type != WorldType.Regular)
 				return true;
 
-			// Left action bar
-			if (pos.X <= 55)
+			var menuRoot = Ui.Root?.GetOrNull("MENU_ROOT");
+			if (menuRoot != null)
+			{
+				foreach (var child in menuRoot.Children)
+					if (child.IsVisible())
+						return true;
+			}
+
+			return IsOverInteractiveWidget(Ui.Root, pos);
+		}
+
+		static bool IsOverInteractiveWidget(Widget w, int2 pos)
+		{
+			if (w == null || !w.IsVisible())
+				return false;
+
+			if (w.Id is "INTERACTION_CONTROLLER" or "WORLD_KEYHANDLER" or "GLOBAL_KEYHANDLER" or "PERF_ROOT" or "TOOLTIP_CONTAINER" or "MOUSE_ATTATCHMENT" or "CHAT_OVERLAY")
+				return false;
+
+			var typeName = w.GetType().Name;
+			if (typeName is "WorldInteractionControllerWidget" or "ViewportControllerWidget")
+				return false;
+
+			for (var i = w.Children.Count - 1; i >= 0; i--)
+				if (IsOverInteractiveWidget(w.Children[i], pos))
+					return true;
+
+			if (!w.EventBounds.Contains(pos))
+				return false;
+
+			if (typeName.Contains("Button") ||
+				typeName.Contains("Checkbox") ||
+				typeName.Contains("Palette") ||
+				typeName.Contains("SupportPowers") ||
+				typeName.Contains("Radar") ||
+				typeName.Contains("Slider") ||
+				typeName.Contains("ScrollPanel") ||
+				typeName.Contains("ScrollItem") ||
+				typeName.Contains("TextField") ||
+				typeName.Contains("Tabs"))
 				return true;
 
-			// Right sidebar (Radar, production palette, power bar)
-			var res = Game.Renderer?.Resolution;
-			if (res != null && pos.X >= res.Value.Width - 250)
-				return true;
-
-			// Top bar / menu buttons
-			if (pos.Y <= 45)
+			if (w.Id is "SIDEBAR_BACKGROUND_TOP" or "SIDEBAR_PRODUCTION" or "SIDEBAR_MONEYBIN" or "COMMAND_BAR" or "STANCE_BAR")
 				return true;
 
 			return false;
 		}
+
+		public bool HasActiveFinger(long fingerId) => firstFingerId == fingerId || secondFingerId == fingerId;
 
 		public int LongPressThresholdMs => Game.Settings?.Game?.TouchHoldDuration ?? 1000;
 
@@ -95,6 +129,7 @@ namespace OpenRA
 				if (elapsed >= LongPressThresholdMs && moveDistance <= SwipeMoveThreshold)
 				{
 					gestureMode = GestureMode.BoxSelecting;
+					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
 					queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
 				}
 			}
@@ -105,7 +140,13 @@ namespace OpenRA
 
 		public void OnFingerDown(long fingerId, int2 pos)
 		{
-			if (firstFingerId == null)
+			if (gestureMode == GestureMode.None)
+			{
+				firstFingerId = null;
+				secondFingerId = null;
+			}
+
+			if (firstFingerId == null || firstFingerId == fingerId)
 			{
 				firstFingerId = fingerId;
 				firstFingerStartPos = pos;
@@ -124,7 +165,7 @@ namespace OpenRA
 					gestureMode = GestureMode.Undecided;
 				}
 			}
-			else if (secondFingerId == null)
+			else if (secondFingerId == null || secondFingerId == fingerId)
 			{
 				secondFingerId = fingerId;
 				secondFingerPos = pos;
@@ -139,6 +180,7 @@ namespace OpenRA
 				previousPanCenter = (firstFingerCurrentPos + secondFingerPos) / 2;
 				previousPinchDistance = (firstFingerCurrentPos - secondFingerPos).Length;
 
+				queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, previousPanCenter, int2.Zero, Modifiers.None, 0));
 				queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Middle, previousPanCenter, int2.Zero, Modifiers.None, 0));
 			}
 		}
@@ -192,12 +234,15 @@ namespace OpenRA
 					{
 						// Held >= threshold: Enter box selection
 						gestureMode = GestureMode.BoxSelecting;
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
 						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
 					}
 					else if (moveDistance > SwipeMoveThreshold)
 					{
 						// Moved before threshold: Enter swipe-to-pan screen
 						gestureMode = GestureMode.SingleFingerPanning;
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
 						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Middle, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
 						var initialDelta = firstFingerCurrentPos - firstFingerStartPos;
 						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Middle, firstFingerCurrentPos, initialDelta, Modifiers.None, 0));

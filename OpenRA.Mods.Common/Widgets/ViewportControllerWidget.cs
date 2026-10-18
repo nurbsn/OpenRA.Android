@@ -317,7 +317,10 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var gs = Game.Settings.Game;
 			var scrollButton = gs.MouseControlStyle == MouseControlStyle.Classic ^ gs.UseAlternateScrollButton ? MouseButton.Right : MouseButton.Middle;
-			var scrollType = mi.Button.HasFlag(scrollButton) ? gs.MouseScroll : MouseScrollType.Disabled;
+			var isTouchPan = OperatingSystem.IsAndroid() && mi.Button.HasFlag(MouseButton.Middle);
+			var scrollType = isTouchPan
+				? (gs.MouseScroll == MouseScrollType.Inverted ? MouseScrollType.Inverted : MouseScrollType.Standard)
+				: (mi.Button.HasFlag(scrollButton) ? gs.MouseScroll : MouseScrollType.Disabled);
 
 			if (scrollType == MouseScrollType.Disabled)
 				return IsJoystickScrolling || isStandardScrolling;
@@ -326,10 +329,18 @@ namespace OpenRA.Mods.Common.Widgets
 			{
 				if (mi.Event == MouseInputEvent.Down && !isStandardScrolling)
 				{
+					if (isTouchPan && Ui.MouseFocusWidget != null && Ui.MouseFocusWidget != this)
+						Ui.MouseFocusWidget.YieldMouseFocus(mi);
+
 					if (!TakeMouseFocus(mi))
 						return false;
 
 					standardScrollStart = mi.Location;
+					if (isTouchPan)
+					{
+						isStandardScrolling = true;
+						return true;
+					}
 				}
 				else if (mi.Event == MouseInputEvent.Move && (isStandardScrolling ||
 					(standardScrollStart.HasValue && ((standardScrollStart.Value - mi.Location).Length > Game.Settings.Game.MouseScrollDeadzone))))

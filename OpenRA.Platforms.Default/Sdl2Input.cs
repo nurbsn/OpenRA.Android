@@ -115,6 +115,26 @@ namespace OpenRA.Platforms.Default
 					case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
 					case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
 					{
+						if (OperatingSystem.IsAndroid())
+						{
+							// Ignore fake mouse events synthesized by SDL2 from touch input
+							if (e.button.which == SDL.SDL_TOUCH_MOUSEID)
+								break;
+
+							// Route emulator/hardware left-click through TouchInputAdapter so swipe-to-pan and hold-to-select work consistently
+							if (e.button.button == SDL.SDL_BUTTON_LEFT)
+							{
+								var androidInput = lockedMousePosition ?? new int2(e.button.x, e.button.y);
+								var androidPos = EventPosition(device, androidInput.X, androidInput.Y);
+								if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN)
+									touchAdapter.OnFingerDown(-100, androidPos);
+								else
+									touchAdapter.OnFingerUp(-100, androidPos);
+
+								break;
+							}
+						}
+
 						// Mouse 1, Mouse 2 and Mouse 3 are handled as mouse inputs
 						// Mouse 4 and Mouse 5 are treated as (pseudo) keyboard inputs
 						if (e.button.button == SDL.SDL_BUTTON_LEFT ||
@@ -181,6 +201,20 @@ namespace OpenRA.Platforms.Default
 
 					case SDL.SDL_EventType.SDL_MOUSEMOTION:
 					{
+						if (OperatingSystem.IsAndroid())
+						{
+							if (e.motion.which == SDL.SDL_TOUCH_MOUSEID)
+								break;
+
+							if (touchAdapter.HasActiveFinger(-100))
+							{
+								var androidInput = lockedMousePosition ?? new int2(e.motion.x, e.motion.y);
+								var androidPos = EventPosition(device, androidInput.X, androidInput.Y);
+								touchAdapter.OnFingerMotion(-100, androidPos);
+								break;
+							}
+						}
+
 						var mousePos = new int2(e.motion.x, e.motion.y);
 						var input = lockedMousePosition ?? mousePos;
 						var pos = EventPosition(device, input.X, input.Y);

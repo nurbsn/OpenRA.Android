@@ -100,9 +100,10 @@ namespace OpenRA.Android
 				{
 					"Game.Mod=" + activeMod,
 					"Graphics.GLProfile=Embedded",
-					"Input.ControlScheme=Classic",
+					"Game.MouseControlStyle=Classic",
 					"Game.MouseScroll=Standard",
-					"Game.UseAlternateScrollButton=True",
+					"Game.ViewportEdgeScroll=False",
+					"Game.UseAlternateScrollButton=False",
 					"Game.IntroductionPromptVersion=2"
 				};
 

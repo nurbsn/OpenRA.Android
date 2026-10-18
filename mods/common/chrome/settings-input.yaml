@@ -40,8 +40,8 @@ Container@INPUT_PANEL:
 									Y: 25
 									Width: PARENT_WIDTH
 									Height: 20
-									Ticks: 18
-									MinimumValue: 300
+									Ticks: 20
+									MinimumValue: 100
 									MaximumValue: 2000
 								Label@TOUCH_HOLD_DELAY_VALUE:
 									Y: 48

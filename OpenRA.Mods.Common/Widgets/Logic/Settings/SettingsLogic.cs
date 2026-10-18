@@ -204,7 +204,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			}
 
 			tab.Id = panelID;
-			tab.GetText = () => label;
+			tab.GetText = () => panels.TryGetValue(panelID, out var key) ? FluentProvider.GetMessage(key) : label;
 			tab.IsHighlighted = () => activePanel == panelID;
 			tab.OnClick = () =>
 			{

@@ -24,6 +24,24 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		[FluentReference]
 		const string LanguagePl = "button-language-pl";
 
+		[FluentReference]
+		const string LanguageDe = "button-language-de";
+
+		[FluentReference]
+		const string LanguageEs = "button-language-es";
+
+		[FluentReference]
+		const string LanguageFr = "button-language-fr";
+
+		[FluentReference]
+		const string LanguagePt = "button-language-pt";
+
+		[FluentReference]
+		const string LanguageIt = "button-language-it";
+
+		[FluentReference]
+		const string LanguageRu = "button-language-ru";
+
 		readonly GameSettings gameSettings;
 		string origLanguage;
 
@@ -31,6 +49,12 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		{
 			{ "en", LanguageEn },
 			{ "pl", LanguagePl },
+			{ "de", LanguageDe },
+			{ "es", LanguageEs },
+			{ "fr", LanguageFr },
+			{ "pt", LanguagePt },
+			{ "it", LanguageIt },
+			{ "ru", LanguageRu },
 		};
 
 		[ObjectCreator.UseCtor]
@@ -43,6 +67,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		Func<bool> InitPanel(Widget panel)
 		{
+			var scrollPanel = panel.Get<ScrollPanelWidget>("SETTINGS_SCROLLPANEL");
 			origLanguage = gameSettings.Language ?? "en";
 
 			var dropdown = panel.GetOrNull<DropDownButtonWidget>("LANGUAGE_DROPDOWN");
@@ -60,19 +85,18 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				dropdown.OnMouseDown = _ => ShowLanguageDropdown(dropdown);
 			}
 
-			var btnEn = panel.GetOrNull<ButtonWidget>("BUTTON_LANG_EN");
-			if (btnEn != null)
+			foreach (var code in Languages.Keys)
 			{
-				btnEn.IsHighlighted = () => (gameSettings.Language ?? "en").Equals("en", StringComparison.OrdinalIgnoreCase);
-				btnEn.OnClick = () => SetLanguage("en");
+				var langCode = code;
+				var btn = panel.GetOrNull<ButtonWidget>("BUTTON_LANG_" + langCode.ToUpperInvariant());
+				if (btn != null)
+				{
+					btn.IsHighlighted = () => (gameSettings.Language ?? "en").Equals(langCode, StringComparison.OrdinalIgnoreCase);
+					btn.OnClick = () => SetLanguage(langCode);
+				}
 			}
 
-			var btnPl = panel.GetOrNull<ButtonWidget>("BUTTON_LANG_PL");
-			if (btnPl != null)
-			{
-				btnPl.IsHighlighted = () => (gameSettings.Language ?? "en").Equals("pl", StringComparison.OrdinalIgnoreCase);
-				btnPl.OnClick = () => SetLanguage("pl");
-			}
+			SettingsUtils.AdjustSettingsScrollPanelLayout(scrollPanel);
 
 			return () => origLanguage != gameSettings.Language;
 		}

@@ -151,9 +151,12 @@ namespace OpenRA.Mods.Common.Widgets
 
 		public override bool HandleMouseInput(MouseInput mi)
 		{
+			if (mi.Button == MouseButton.Middle)
+				return false;
+
 			mousePos = worldRenderer.Viewport.ViewToWorldPx(mi.Location);
 
-			var useClassicMouseStyle = gameSettings.MouseControlStyle == MouseControlStyle.Classic;
+			var useClassicMouseStyle = gameSettings.MouseControlStyle == MouseControlStyle.Classic || OperatingSystem.IsAndroid();
 			var actionButton = World.OrderGenerator.ActionButton;
 
 			var multiClick = mi.MultiTapCount >= 2;

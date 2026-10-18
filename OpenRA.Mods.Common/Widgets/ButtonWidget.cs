@@ -77,11 +77,11 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			ModRules = modData.DefaultRules;
 
-			var textCache = new CachedTransform<string, string>(s => !string.IsNullOrEmpty(s) ? FluentProvider.GetMessage(s) : "");
-			var tooltipTextCache = new CachedTransform<string, string>(s => !string.IsNullOrEmpty(s) ? FluentProvider.GetMessage(s) : "");
-			var tooltipDescCache = new CachedTransform<string, string>(s => !string.IsNullOrEmpty(s) ? FluentProvider.GetMessage(s) : "");
+			var textCache = new CachedTransform<(string Text, string Lang), string>(x => !string.IsNullOrEmpty(x.Text) ? FluentProvider.GetMessage(x.Text) : "");
+			var tooltipTextCache = new CachedTransform<(string Text, string Lang), string>(x => !string.IsNullOrEmpty(x.Text) ? FluentProvider.GetMessage(x.Text) : "");
+			var tooltipDescCache = new CachedTransform<(string Text, string Lang), string>(x => !string.IsNullOrEmpty(x.Text) ? FluentProvider.GetMessage(x.Text) : "");
 
-			GetText = () => textCache.Update(Text);
+			GetText = () => textCache.Update((Text, Game.Settings?.Game?.Language ?? "en"));
 			GetColor = () => TextColor;
 			GetColorDisabled = () => TextColorDisabled;
 			GetContrastColorDark = () => ContrastColorDark;
@@ -89,8 +89,8 @@ namespace OpenRA.Mods.Common.Widgets
 			OnMouseUp = _ => OnClick();
 			OnKeyPress = _ => OnClick();
 			IsHighlighted = () => Highlighted;
-			GetTooltipText = () => tooltipTextCache.Update(TooltipText);
-			GetTooltipDesc = () => tooltipDescCache.Update(TooltipDesc);
+			GetTooltipText = () => tooltipTextCache.Update((TooltipText, Game.Settings?.Game?.Language ?? "en"));
+			GetTooltipDesc = () => tooltipDescCache.Update((TooltipDesc, Game.Settings?.Game?.Language ?? "en"));
 			tooltipContainer = Exts.Lazy(() =>
 				Ui.Root.Get<TooltipContainerWidget>(TooltipContainer));
 		}

@@ -44,7 +44,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 		readonly TextFieldWidget urlInput;
 		readonly ButtonWidget downloadButton;
 		int downloadPercentage;
-		string downloadStatus = "Gotowy do pobierania";
+		string downloadStatus = FluentProvider.GetMessage("label-ready-download");
 		bool isDownloading;
 
 		string activeTab = "mods";
@@ -252,7 +252,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var path = pathInput.Text.Trim();
 				if (string.IsNullOrWhiteSpace(path))
 				{
-					storageStatus = IsPolish ? "Błąd: ścieżka nie może być pusta." : "Error: path cannot be empty.";
+					storageStatus = FluentProvider.GetMessage("label-storage-error-empty");
 					return;
 				}
 
@@ -262,15 +262,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				Game.RefreshInstalledMods();
 				BuildModList();
 
-				storageStatus = IsPolish ? "Zapisano! Utworzono foldery /mods i /maps." : "Saved! Created /mods and /maps folders.";
+				storageStatus = FluentProvider.GetMessage("label-storage-saved");
 			}
 			catch (Exception ex)
 			{
-				storageStatus = IsPolish ? $"Błąd zapisu: {ex.Message}" : $"Save error: {ex.Message}";
+				storageStatus = $"Error: {ex.Message}";
 			}
 		}
-
-		bool IsPolish => (Game.Settings?.Game?.Language ?? "en").StartsWith("pl", StringComparison.OrdinalIgnoreCase);
 
 		void StartDownload(string url)
 		{
@@ -279,19 +277,19 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri))
 			{
-				downloadStatus = IsPolish ? "Błąd: Nieprawidłowy adres URL." : "Error: Invalid URL.";
+				downloadStatus = FluentProvider.GetMessage("label-download-error-url");
 				return;
 			}
 
 			if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
 			{
-				downloadStatus = IsPolish ? "Błąd: Obsługiwane są tylko protokoły HTTP i HTTPS." : "Error: Only HTTP and HTTPS protocols are supported.";
+				downloadStatus = FluentProvider.GetMessage("label-download-error-protocol");
 				return;
 			}
 
 			isDownloading = true;
 			downloadPercentage = 0;
-			downloadStatus = IsPolish ? "Łączenie z serwerem..." : "Connecting to server...";
+			downloadStatus = FluentProvider.GetMessage("label-download-connecting");
 
 			Task.Run(async () =>
 			{
@@ -303,7 +301,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 						{
 							if (!response.IsSuccessStatusCode)
 							{
-								downloadStatus = IsPolish ? $"Błąd pobierania: HTTP {(int)response.StatusCode}" : $"Download error: HTTP {(int)response.StatusCode}";
+								downloadStatus = $"HTTP {(int)response.StatusCode}";
 								isDownloading = false;
 								return;
 							}
@@ -322,7 +320,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							Directory.CreateDirectory(customMods);
 
 							var tempArchive = Path.Combine(customMods, filename + ".downloading");
-							downloadStatus = IsPolish ? $"Pobieranie '{filename}'..." : $"Downloading '{filename}'...";
+							downloadStatus = $"{filename}...";
 
 							using (var fs = new FileStream(tempArchive, FileMode.Create, FileAccess.Write, FileShare.None))
 							{
@@ -330,13 +328,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 								{
 									downloadPercentage = percentage;
 									if (total > 0)
-										downloadStatus = IsPolish ? $"Pobieranie: {percentage}% ({received / 1024} KB / {total / 1024} KB)" : $"Downloading: {percentage}% ({received / 1024} KB / {total / 1024} KB)";
+										downloadStatus = $"{percentage}% ({received / 1024} KB / {total / 1024} KB)";
 									else
-										downloadStatus = IsPolish ? $"Pobieranie: {received / 1024} KB" : $"Downloading: {received / 1024} KB";
+										downloadStatus = $"{received / 1024} KB";
 								}, CancellationToken.None);
 							}
 
-							downloadStatus = IsPolish ? "Instalowanie i wypakowywanie..." : "Installing and extracting...";
+							downloadStatus = FluentProvider.GetMessage("label-download-installing");
 							downloadPercentage = 100;
 
 							var isZipOrOramod = filename.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
@@ -377,7 +375,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 								File.Move(tempArchive, finalFile);
 							}
 
-							downloadStatus = IsPolish ? "Mod zainstalowany pomyślnie!" : "Mod installed successfully!";
+							downloadStatus = FluentProvider.GetMessage("label-download-success");
 							isDownloading = false;
 
 							Game.RunAfterTick(() =>
@@ -390,7 +388,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				}
 				catch (Exception ex)
 				{
-					downloadStatus = $"Błąd: {ex.Message}";
+					downloadStatus = $"Error: {ex.Message}";
 					isDownloading = false;
 				}
 			});

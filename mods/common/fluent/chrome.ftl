@@ -784,6 +784,13 @@ button-storage-default = App Default Directory
 button-save-create-folders = Save & Create Folders
 button-close = Close
 button-mods-title = Mods
+label-storage-error-empty = Error: path cannot be empty.
+label-storage-saved = Saved! Created /mods and /maps folders.
+label-download-error-url = Error: Invalid URL.
+label-download-error-protocol = Error: Only HTTP and HTTPS protocols are supported.
+label-download-connecting = Connecting to server...
+label-download-installing = Installing and extracting...
+label-download-success = Mod installed successfully!
 
 ## settings-language.yaml
 button-panel-language = Language
@@ -791,5 +798,11 @@ label-language-section-header = LANGUAGE & TRANSLATIONS
 label-select-language = Language:
 label-language-restart-info = Select the application language. Mod Manager, settings, and translated interface text will update to the selected language. Some changes may require restarting or switching mods.
 button-language-en = English
-button-language-pl = Polski (Polish)
+button-language-pl = Polski
+button-language-de = Deutsch
+button-language-es = Español
+button-language-fr = Français
+button-language-pt = Português
+button-language-it = Italiano
+button-language-ru = Русский
 
