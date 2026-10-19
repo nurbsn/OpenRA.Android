@@ -152,46 +152,64 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Wydanie nOpenRA Mobile (RTS Engine): sterowanie dotykowe, menedżer modów i tłumaczenia PL/EN.'
+                'text': 'Wydanie nOpenRA Mobile (RTS Engine): sterowanie dotykowe, menedżer modów, domyślna skala UI 150% i tłumaczenia.'
             },
             {
                 'language': 'en-US',
-                'text': 'nOpenRA Mobile (RTS Engine) release: touch controls, in-game mod manager, and EN/PL localization.'
+                'text': 'nOpenRA Mobile (RTS Engine) release: touch controls, in-game mod manager, default 150% UI scale, and localization.'
             }
         ]
 
-        for attempt_status in [status, 'draft']:
-            track_body = {
-                'track': track,
-                'releases': [{
-                    'name': f"{version_code} (1.0.{version_code - 1})",
-                    'versionCodes': [str(version_code)],
-                    'status': attempt_status,
-                    'releaseNotes': release_notes
-                }]
-            }
+        track_body = {
+            'track': track,
+            'releases': [{
+                'name': f"{version_code} (1.0.{version_code - 1})",
+                'versionCodes': [str(version_code)],
+                'status': status,
+                'releaseNotes': release_notes
+            }]
+        }
+
+        try:
             service.edits().tracks().update(
                 packageName=PACKAGE_NAME,
                 editId=edit_id,
                 track=track,
                 body=track_body
             ).execute()
-            try:
-                service.edits().validate(packageName=PACKAGE_NAME, editId=edit_id).execute()
-                print(f"   Przypisano wersje do sciezki '{track}' ze statusem '{attempt_status}'.")
-                break
-            except HttpError as val_err:
-                val_text = val_err.content.decode('utf-8', errors='ignore')
-                if attempt_status != 'draft' and 'draft app' in val_text:
-                    print("   Aplikacja w Google Play ma jeszcze status 'Draft app' (wymaga dokonczenia deklaracji w konsoli) – zapisuje wydanie ze statusem 'draft'.")
-                    continue
+            print(f"   Przypisano wersje do sciezki '{track}' ze statusem '{status}'.")
+        except HttpError as track_err:
+            track_err_text = track_err.content.decode('utf-8', errors='ignore')
+            if 'draft' not in status and ('draft' in track_err_text.lower() or 'not allowed' in track_err_text.lower()):
+                print("   Aplikacja wymaga statusu 'draft' w Google Play – zapisuje wydanie ze statusem 'draft'...")
+                track_body['releases'][0]['status'] = 'draft'
+                service.edits().tracks().update(
+                    packageName=PACKAGE_NAME,
+                    editId=edit_id,
+                    track=track,
+                    body=track_body
+                ).execute()
+                print(f"   Przypisano wersje do sciezki '{track}' ze statusem 'draft'.")
+            else:
                 raise
 
         print("\n5. Zatwierdzanie zmian w Google Play Console (Commit)...")
         try:
             service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
-        except Exception:
-            service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
+        except HttpError as commit_err:
+            commit_text = commit_err.content.decode('utf-8', errors='ignore')
+            if 'draft' not in track_body['releases'][0]['status'] and 'draft' in commit_text.lower():
+                print("   Zmiana statusu wydania na 'draft' z powodu wymogow Google Play...")
+                track_body['releases'][0]['status'] = 'draft'
+                service.edits().tracks().update(
+                    packageName=PACKAGE_NAME,
+                    editId=edit_id,
+                    track=track,
+                    body=track_body
+                ).execute()
+                service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
+            else:
+                raise
         print("   SUKCES! Zmiany zostaly zatwierdzone w Google Play Console!")
         print("\n========================================================")
         print(f"Wersja {version_code} zostala pomyslnie zapisana w Google Play!")
