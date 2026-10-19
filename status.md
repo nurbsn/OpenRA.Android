@@ -1,7 +1,37 @@
 # Status Projektu: nOpenRA (Port Android)
-Data aktualizacji: 2026-10-17
+Data aktualizacji: 2026-10-19
 
-## 1. Zrealizowane prace i najnowsze zmiany
+## 1. Rozwiązanie odrzucenia w Google Play i wersja v3 (1.0.2)
+
+### A. Diagnoza przyczyny odrzucenia (Awarie u użytkowników / Nieprawidłowe działanie)
+- **Komunikat błędu z Google Play:** *"Aplikacja otwiera się, ale ciągle ulega awariom"* (zrzut ekranu z systemowym oknem dialogowym: *"Clear cache for nOpenRA Mobile? nOpenRA Mobile closed because this app has a bug. Try clearing the app's cache first..."*).
+- **Bezpośrednia przyczyna awarii:**
+  - Zautomatyzowane testy Google Play (Pre-launch report / CTS na Androidzie 15+) są uruchamiane na środowiskach i urządzeniach o **16 KB rozmiarze stron pamięci** (16 KB page size kernel).
+  - Biblioteki `base/lib/arm64-v8a/libopenal.so`, `base/lib/x86_64/libopenal.so` oraz `libfreetype.so` posiadały nagłówki segmentów ELF `PT_LOAD` wyrównane do 4096 bajtów (`align = 4 KB`).
+  - Dynamiczny linker Androida na jądrach 16 KB odrzucał ładowanie tych bibliotek (`dlopen failed: empty/misaligned PT_LOAD segment`), powodując natychmiastowe ubicie procesu aplikacji (SIGSEGV/abort) już w trakcie startu (`SDLActivity.loadLibraries` -> `System.loadLibrary("openal")`).
+
+### B. Wdrożone poprawki i rekonfiguracja kompilacji
+1. **Pobranie i konfiguracja oficjalnego Android NDK r28c:**
+   - Zainstalowano pakiet `ndk;28.2.13676358` oraz `cmake;3.22.1` z ninja.
+2. **Kompilacja bibliotek natywnych z obsługą stron pamięci 16 KB:**
+   - Przebudowano od źródeł `libopenal.so` (OpenAL Soft) dla architektur `arm64-v8a` oraz `x86_64` z flagą linkera `-Wl,-z,max-page-size=16384`.
+   - Przebudowano od źródeł `libfreetype.so` (FreeType) dla `arm64-v8a` oraz `x86_64` z flagą `-Wl,-z,max-page-size=16384`.
+   - Przetestowano i potwierdzono nagłówki ELF: **wszystkie 8 bibliotek `.so` w `libs` mają teraz `align = 16384` (16 KB) oraz idealne dopasowanie offsetów**.
+3. **Odporność na błędy audio (`OpenAlSoundEngine`):**
+   - W `OpenRA.Platforms.Default/DefaultPlatform.cs` rozszerzono łapanie wyjątków z `InvalidOperationException` na ogólny `Exception`, dzięki czemu w przypadku braku urządzenia audio lub problemu z biblioteką natywną silnik bezpiecznie przełącza się na `DummySoundEngine()` zamiast zamykać grę.
+4. **Zabezpieczenie ścieżek zapisu (`AndroidGameBridge.cs`):**
+   - Dodano bezpieczny fallback do wewnętrznego `context.FilesDir`, jeśli pamięć zewnętrzna urządzenia testowego jest niedostępna lub odmontowana.
+5. **Obsługa dużych ekranów i tabletów (`resizeableActivity`):**
+   - Dodano `android:resizeableActivity="true"` w `AndroidManifest.xml` oraz `ResizeableActivity = true` w `LauncherActivity.cs` (usuwając zalecenia Google Play dotyczące urządzeń z dużym ekranem).
+6. **Podbicie wersji do 3 (`1.0.2`):**
+   - Zaktualizowano `ApplicationVersion = 3`, `ApplicationDisplayVersion = 1.0.2` w `OpenRA.Android.csproj`.
+   - Zaktualizowano `versionCode = "3"`, `versionName = "1.0.2"` w `AndroidManifest.xml`.
+   - Zaktualizowano `AndroidVersion = "1.0.2"` w `Game.cs`.
+   - Zaktualizowano notatki do wydania w `upload-to-googleplay.py`.
+
+---
+
+## 2. Zrealizowane prace i wcześniejsze zmiany
 
 ### A. Wersjonowanie aplikacji i modów (Version System)
 - Rozwiązano problem wyświetlania wersji deweloperskiej `{DEV_VERSION}`.
