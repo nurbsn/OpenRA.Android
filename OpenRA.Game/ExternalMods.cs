@@ -113,7 +113,7 @@ namespace OpenRA
 
 			// Avoid possibly overwriting a valid mod with an obviously bogus one
 			var key = ExternalMod.MakeKey(mod);
-			if ((forceRegistration || File.Exists(mod.LaunchPath)) && (path == null || Path.GetFileNameWithoutExtension(path) == key))
+			if ((forceRegistration || OperatingSystem.IsAndroid() || File.Exists(mod.LaunchPath)) && (path == null || Path.GetFileNameWithoutExtension(path) == key))
 				mods[key] = mod;
 		}
 

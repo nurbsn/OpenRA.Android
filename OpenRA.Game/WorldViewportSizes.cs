@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System;
 using OpenRA.Primitives;
 
 namespace OpenRA
@@ -24,7 +25,7 @@ namespace OpenRA
 		public readonly int MaxZoomWindowHeight = 240;
 		public readonly bool AllowNativeZoom = true;
 
-		public readonly Size MinEffectiveResolution = new(1024, 720);
+		public readonly Size MinEffectiveResolution = OperatingSystem.IsAndroid() ? new(900, 600) : new(1024, 720);
 
 		public int2 GetSizeRange(WorldViewport distance)
 		{

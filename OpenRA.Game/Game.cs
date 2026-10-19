@@ -437,11 +437,12 @@ namespace OpenRA
 				if (launchPath != null && launchPath[0] == '"' && launchPath[^1] == '"')
 					launchPath = launchPath[1..^1];
 
-				// Metadata registration requires an explicit launch path
-				if (launchPath != null)
-					ExternalMods.Register(Mods[modID], launchPath, launchArgs, ModRegistration.User);
+				// Metadata registration requires an explicit launch path on desktop, or in-process on Android
+				if (launchPath != null || OperatingSystem.IsAndroid())
+					ExternalMods.Register(Mods[modID], launchPath ?? "", launchArgs, ModRegistration.User);
 
-				ExternalMods.ClearInvalidRegistrations(ModRegistration.User);
+				if (!OperatingSystem.IsAndroid())
+					ExternalMods.ClearInvalidRegistrations(ModRegistration.User);
 			}
 			else
 				throw new InvalidOperationException($"Unknown or invalid mod '{modID}'.");

@@ -176,7 +176,8 @@ namespace OpenRA.Network
 				PlayTime = (int)(DateTime.UtcNow - startTime).TotalSeconds;
 
 			var externalKey = ExternalMod.MakeKey(Mod, Version);
-			if (Game.ExternalMods.TryGetValue(externalKey, out var external) && external.Version == Version)
+			if ((Game.ExternalMods.TryGetValue(externalKey, out var external) && external.Version == Version)
+				|| (Game.Mods.TryGetValue(Mod, out var localMod) && localMod.Metadata.Version == Version))
 				IsCompatible = true;
 
 			// Games advertised using the old API used local mod metadata
