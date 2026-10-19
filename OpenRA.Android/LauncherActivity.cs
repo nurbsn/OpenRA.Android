@@ -15,6 +15,7 @@ namespace OpenRA.Android
 		NoHistory = true,
 		ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.UiMode | ConfigChanges.KeyboardHidden,
 		ScreenOrientation = ScreenOrientation.SensorLandscape,
+		ResizeableActivity = true,
 		Theme = "@android:style/Theme.NoTitleBar.Fullscreen")]
 	public class LauncherActivity : Activity
 	{

@@ -152,11 +152,11 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Wydanie nOpenRA Mobile (RTS Engine): sterowanie dotykowe, menedżer modów, domyślna skala UI 150% i tłumaczenia.'
+                'text': 'Poprawki stabilności: pełna zgodność z urządzeniami o stronach pamięci 16 KB (Android 15+), odporność na awarie dźwięku, obsługa dużych ekranów i tabletów.'
             },
             {
                 'language': 'en-US',
-                'text': 'nOpenRA Mobile (RTS Engine) release: touch controls, in-game mod manager, default 150% UI scale, and localization.'
+                'text': 'Stability improvements: full compliance with 16 KB page-size devices (Android 15+), audio fallback resilience, and enhanced large screen/tablet support.'
             }
         ]
 

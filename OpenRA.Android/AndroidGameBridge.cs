@@ -37,9 +37,27 @@ namespace OpenRA.Android
 				var context = global::Android.App.Application.Context;
 				NativeLibraryResolver.Initialize();
 
-				var externalFiles = context.GetExternalFilesDir(null)?.AbsolutePath ?? context.FilesDir.AbsolutePath;
-				var gameDir = Path.Combine(externalFiles, "Game");
-				var supportDir = Path.Combine(externalFiles, "Support");
+				string baseDir = null;
+				try
+				{
+					var ext = context.GetExternalFilesDir(null)?.AbsolutePath;
+					if (!string.IsNullOrEmpty(ext))
+					{
+						var testDir = Path.Combine(ext, "Game");
+						Directory.CreateDirectory(testDir);
+						baseDir = ext;
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"[AndroidGameBridge] Failed to use external files dir, falling back to internal: {ex.Message}");
+				}
+
+				if (string.IsNullOrEmpty(baseDir))
+					baseDir = context.FilesDir.AbsolutePath;
+
+				var gameDir = Path.Combine(baseDir, "Game");
+				var supportDir = Path.Combine(baseDir, "Support");
 
 				Directory.CreateDirectory(gameDir);
 				Directory.CreateDirectory(supportDir);
