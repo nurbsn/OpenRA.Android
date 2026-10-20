@@ -152,11 +152,11 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Poprawki stabilności: pełna zgodność z urządzeniami o stronach pamięci 16 KB (Android 15+), odporność na awarie dźwięku, obsługa dużych ekranów i tabletów.'
+                'text': 'Poprawki stabilności: bezpośredni start SDLActivity z integracją MainApplication, eliminacja podwójnego splash screenu i pełna obsługa Android 15.'
             },
             {
                 'language': 'en-US',
-                'text': 'Stability improvements: full compliance with 16 KB page-size devices (Android 15+), audio fallback resilience, and enhanced large screen/tablet support.'
+                'text': 'Stability improvements: direct SDLActivity startup with MainApplication lifecycle integration, eliminated splash transition glitches, and Android 15 compatibility.'
             }
         ]
 

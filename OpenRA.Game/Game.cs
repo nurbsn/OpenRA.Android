@@ -58,7 +58,7 @@ namespace OpenRA
 		public static Sound Sound;
 
 		public static string EngineVersion { get; private set; }
-		public const string AndroidVersion = "1.0.2";
+		public const string AndroidVersion = "1.0.3";
 		public static string AppVersion => $"{EngineVersion} (Android v{AndroidVersion})";
 		public static LocalPlayerProfile LocalPlayerProfile;
 
@@ -584,24 +584,7 @@ namespace OpenRA
 			if (Settings?.Game != null && !string.IsNullOrWhiteSpace(Settings.Game.CustomContentPath))
 				return Settings.Game.CustomContentPath;
 
-			// Default for Android: try shared user storage first, fallback to app external SupportDir/Content under Scoped Storage
-			if (OperatingSystem.IsAndroid() || Directory.Exists("/storage/emulated/0"))
-			{
-				var sharedDir = "/storage/emulated/0/OpenRA";
-				try
-				{
-					if (Directory.Exists(sharedDir))
-						return sharedDir;
-					Directory.CreateDirectory(sharedDir);
-					return sharedDir;
-				}
-				catch
-				{
-					// Scoped Storage (Android 11+ without MANAGE_EXTERNAL_STORAGE) blocks root /storage/emulated/0/OpenRA;
-					// fallback to app-specific external storage which is always writable.
-				}
-			}
-
+			// Default for Android: always use app-specific SupportDir/Content to guarantee full permissions under Scoped Storage
 			return Path.Combine(Platform.SupportDir, "Content");
 		}
 

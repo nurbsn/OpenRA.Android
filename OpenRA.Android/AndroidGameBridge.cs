@@ -65,7 +65,30 @@ namespace OpenRA.Android
 				Platform.OverrideEngineDir(gameDir);
 				Platform.OverrideSupportDir(supportDir);
 
-				AssetExtractor.EnsureAssetsExtracted(context, gameDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
+				try
+				{
+					AssetExtractor.EnsureAssetsExtracted(context, gameDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"[OpenRA.Android] Extraction failed in {gameDir}: {ex.Message}");
+					if (baseDir != context.FilesDir.AbsolutePath)
+					{
+						Console.WriteLine("[OpenRA.Android] Retrying asset extraction in internal FilesDir...");
+						baseDir = context.FilesDir.AbsolutePath;
+						gameDir = Path.Combine(baseDir, "Game");
+						supportDir = Path.Combine(baseDir, "Support");
+						Directory.CreateDirectory(gameDir);
+						Directory.CreateDirectory(supportDir);
+						Platform.OverrideEngineDir(gameDir);
+						Platform.OverrideSupportDir(supportDir);
+						AssetExtractor.EnsureAssetsExtracted(context, gameDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
+					}
+					else
+					{
+						throw;
+					}
+				}
 
 				// Pre-load mod and platform assemblies packaged in the APK into the default load context
 				var modAssemblies = new[] { "OpenRA.Platforms.Default", "OpenRA.Mods.Common", "OpenRA.Mods.Cnc", "OpenRA.Mods.D2k" };
