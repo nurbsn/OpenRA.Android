@@ -1,7 +1,24 @@
 # Status Projektu: nOpenRA (Port Android)
 Data aktualizacji: 2026-10-20
 
-## 1. Rozwiązanie awarii startowej cyklu życia aktywności - Wersja v4 (1.0.3)
+## 1. Wyjaśnienie odrzucenia w Google Play i status Wersji 4 (1.0.3)
+
+### A. Diagnoza odrzucenia (20 października)
+- **Komunikat z Google Play:** *"Naruszenie zasad dotyczących nieprawidłowego działania – Awarie u użytkowników: Aplikacja otwiera się, ale ciągle ulega awariom. Wyegzekwowano: 20 paź"*.
+- **Weryfikacja przez Google Play Developer API:**
+  - Odrzucenie dotyczyło **Wersji 3 (1.0.2)**, a nie Wersji 4!
+  - W konsoli zarejestrowane były dotąd jedynie wersje 1, 2 oraz 3.
+  - Zrzuty ekranu dołączone przez Google (splash screen w pionie i poziomie) w 100% potwierdzają zdiagnozowany problem wersji 3: brak implementacji metody natywnej JNI przy bezpośrednim uruchomieniu `SDLActivity` przez crawler (`UnsatisfiedLinkError`) oraz wyścig w oknie `WindowManager` przy obrocie ekranu w trampoline activity.
+
+### B. Wykrycie i naprawa błędu podpisu oraz uploadu
+- Przy próbie uploadu Wersji 4 wykryto, że lokalna paczka AAB w katalogu `bin` była podpisana domyślnym kluczem deweloperskim Android Debug (`24:58:4C:83...`), przez co Google Play zwracał błąd 403 (oczekiwano klucza `B1:68:7F:21...`).
+- Potwierdzono, że oficjalny magazyn kluczy `nopenra-upload.keystore` posiada **dokładnie ten oczekiwany przez Google odcisk SHA1: `B1:68:7F:21:DE:E8:F8:7F:B1:CD:5D:F6:F9:A9:23:C3:88:10:30:18`**.
+- W skrypcie `upload-to-googleplay.py` usunięto błąd, który przy kodzie 403 cicho ignorował błąd i przepinał starą wersję 3.
+- Dodano automatyczną weryfikację certyfikatu w `upload-to-googleplay.py` i `build-android-release.ps1` – próba przesłania paczki z podpisem debug jest natychmiast blokowana z czytelnym komunikatem.
+
+---
+
+## 2. Rozwiązanie awarii startowej w kodzie (Wersja v4 / 1.0.3)
 
 ### A. Diagnoza awarii na zrzutach z Google Play (20 października)
 - **Komunikat błędu:** *"Aplikacja otwiera się, ale ciągle ulega awariom"* (zrzuty ekranu ukazujące zapętlenie splash screenu w orientacji poziomej, czarne koło maski wycięcia kamery i ponowny start w pionie).
