@@ -1,7 +1,39 @@
 # Status Projektu: nOpenRA (Port Android)
-Data aktualizacji: 2026-10-19
+Data aktualizacji: 2026-10-20
 
-## 1. Rozwiązanie odrzucenia w Google Play i wersja v3 (1.0.2)
+## 1. Rozwiązanie awarii startowej cyklu życia aktywności - Wersja v4 (1.0.3)
+
+### A. Diagnoza awarii na zrzutach z Google Play (20 października)
+- **Komunikat błędu:** *"Aplikacja otwiera się, ale ciągle ulega awariom"* (zrzuty ekranu ukazujące zapętlenie splash screenu w orientacji poziomej, czarne koło maski wycięcia kamery i ponowny start w pionie).
+- **Zidentyfikowana bezpośrednia przyczyna awarii:**
+  1. **Brak implementacji metody natywnej (`UnsatisfiedLinkError`):**
+     - Dotychczas rejestracja metod JNI (`runManagedGame`) następowała dopiero w `LauncherActivity.OnCreate()`.
+     - W `AndroidManifest.xml` aktywność `org.libsdl.app.SDLActivity` posiadała atrybut `android:exported="true"`.
+     - Zautomatyzowany robot testowy Google Play (Robo Crawler / Firebase Test Lab) oraz mechanizm wznawiania po ubiciu procesu (Process Death / Recents restore) uruchamiały `SDLActivity` bezpośrednio, z pominięciem `LauncherActivity`.
+     - Skutkowało to natychmiastowym błędem w Java: `java.lang.UnsatisfiedLinkError: No implementation found for void org.libsdl.app.SDLActivity.runManagedGame()`, ubijającym proces natychmiast po starcie.
+  2. **Wyścig w oknie WindowManager (Trampoline Activity):**
+     - `LauncherActivity` żądała `ScreenOrientation.SensorLandscape` i natychmiast po `StartActivity` wywoływała `Finish()`. W połączeniu z obrotem ekranu z orientacji pionowej (w jakiej roboty Google domyślnie trzymają urządzenia) powodowało to `Activity top resumed state loss timeout` i awaryjne zamykanie okna przez systemowy `ActivityTaskManager`.
+
+### B. Wdrożone rozwiązania w wersji 4 (1.0.3)
+1. **Wprowadzenie klasy `MainApplication` (`OpenRA.Android/MainApplication.cs`):**
+   - Zarejestrowano własną klasę `[Application]` w systemie Android.
+   - `MainApplication.OnCreate()` jest **zawsze gwarantowane przez system Android do wykonania jako pierwsze w procesie**, zanim jakakolwiek Activity (`SDLActivity` czy `LauncherActivity`) rozpocznie działanie.
+   - Rejestracja JNI (`AndroidGameBridge.RegisterJniMethods()`) wykonuje się natychmiast na poziomie aplikacji, eliminując jakiekolwiek ryzyko `UnsatisfiedLinkError`.
+2. **Bezpośredni punkt wejścia (`SDLActivity` jako jedyny launcher):**
+   - Przeniesiono filtry intencji `android.intent.action.MAIN` oraz `android.intent.category.LAUNCHER` bezpośrednio na `org.libsdl.app.SDLActivity`.
+   - Wyeliminowano całkowicie trampoline activity, podwójne splash screeny i kolizje przy obrocie ekranu.
+   - `LauncherActivity` pozostawiono jako bezpieczny wewnętrzny redirect ze wsteczną kompatybilnością.
+3. **Odporność na błędy zapisu i Scoped Storage:**
+   - Wyeliminowano próby bezpośredniego zapisu do `/storage/emulated/0/OpenRA` w `Game.cs:GetCustomContentPath()`, które w Androidzie 11+ (targetSdk 36) powodowały błędy `MediaProvider: Creating or writing to a non-default top level directory is not allowed!`. Aplikacja domyślnie korzysta w 100% z legalnego, zawsze dostępnego katalogu `SupportDir/Content`.
+   - Dodano podwójny fallback w `AndroidGameBridge`: w razie niepowodzenia wypakowania zasobów na pamięć zewnętrzną, następuje natychmiastowe automatyczne powtórzenie w pamięci wewnętrznej (`FilesDir`).
+4. **Podbicie wersji:**
+   - `ApplicationVersion = 4`, `ApplicationDisplayVersion = 1.0.3` (csproj).
+   - `versionCode = "4"`, `versionName = "1.0.3"` (manifest).
+   - `AndroidVersion = "1.0.3"` (Game.cs).
+
+---
+
+## 2. Rozwiązanie problemu stron pamięci 16 KB (Poprzednia wersja v3)
 
 ### A. Diagnoza przyczyny odrzucenia (Awarie u użytkowników / Nieprawidłowe działanie)
 - **Komunikat błędu z Google Play:** *"Aplikacja otwiera się, ale ciągle ulega awariom"* (zrzut ekranu z systemowym oknem dialogowym: *"Clear cache for nOpenRA Mobile? nOpenRA Mobile closed because this app has a bug. Try clearing the app's cache first..."*).
