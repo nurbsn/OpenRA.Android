@@ -65,6 +65,8 @@ STORE_LISTINGS = {
 
 def find_aab():
     patterns = [
+        os.path.join("bin", "net10.0-android", "publish", "*Signed.aab"),
+        os.path.join("bin", "Release", "net10.0-android", "publish", "*Signed.aab"),
         os.path.join("bin", "Release", "net10.0-android", "**", "*Signed.aab"),
         os.path.join("bin", "net10.0-android", "**", "*Signed.aab"),
         os.path.join("OpenRA.Android", "bin", "Release", "net10.0-android", "**", "*Signed.aab"),
@@ -95,6 +97,19 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
     print(f"Plik paczki: {aab_path}")
     print(f"Rozmiar: {os.path.getsize(aab_path) / (1024*1024):.2f} MB")
     print(f"Sciezka (Track): {track}")
+
+    # Weryfikacja czy paczka nie jest przypadkiem podpisana kluczem debug
+    try:
+        import zipfile
+        with zipfile.ZipFile(aab_path, 'r') as z:
+            names = z.namelist()
+            if any('ANDROIDD.RSA' in n or 'ANDROIDD.SF' in n for n in names):
+                print("\n[BLAD KRYTYCZNY] Wykryto podpis kluczem debugującym Android Debug (ANDROIDD.RSA)!")
+                print("Paczka musi być podpisana oficjalnym kluczem produkcyjnym (nopenra-upload.keystore).")
+                print("Uruchom skrypt .\\build-android-release.ps1 i podaj poprawne hasło do magazynu kluczy.")
+                sys.exit(1)
+    except Exception as sig_check_err:
+        print(f"Ostrzeżenie przy sprawdzaniu podpisu paczki: {sig_check_err}")
 
     try:
         credentials = service_account.Credentials.from_service_account_file(
@@ -137,7 +152,7 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
             print(f"   SHA-256: {sha256}")
         except HttpError as upload_err:
             err_text = upload_err.content.decode('utf-8', errors='ignore')
-            if 'already been used' in err_text or upload_err.status_code == 403 or upload_err.status_code == 400:
+            if 'already been used' in err_text:
                 bundles_list = service.edits().bundles().list(packageName=PACKAGE_NAME, editId=edit_id).execute()
                 existing_bundles = bundles_list.get('bundles', [])
                 if existing_bundles:
@@ -146,6 +161,7 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
                 else:
                     raise
             else:
+                print(f"\n[BLAD PRZESYLANIA PAKIETU DO GOOGLE PLAY]\nKod HTTP: {upload_err.status_code}\nOdpowiedź Google: {err_text}")
                 raise
 
         print(f"\n4. Przypisywanie wersji {version_code} do sciezki '{track}'...")

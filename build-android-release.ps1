@@ -96,7 +96,7 @@ if (Test-Path $objDir) {
 
 $binAndroidDir = Join-Path $scriptDir "bin\net10.0-android"
 if (Test-Path $binAndroidDir) {
-	Get-ChildItem -Path $binAndroidDir -Include "*.aab","*.apk" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force
+	Get-ChildItem -Path "$binAndroidDir\*" -Include "*.aab","*.apk" -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force
 }
 
 Write-Host "`nKompilacja i publikacja do Android App Bundle (AAB) oraz APK..." -ForegroundColor Cyan
@@ -119,9 +119,15 @@ dotnet publish "$projectPath" -f net10.0-android -c Release `
 	-p:AndroidSigningKeyPass=$Password `
 	-p:AndroidSigningStorePass=$Password
 
-$outputAab = Get-ChildItem -Path (Join-Path $scriptDir "bin") -Filter "*Signed.aab" -Recurse -ErrorAction SilentlyContinue |
+$outputAab = Get-ChildItem -Path (Join-Path $scriptDir "bin\net10.0-android\publish") -Filter "*Signed.aab" -ErrorAction SilentlyContinue |
 	Sort-Object LastWriteTime -Descending |
 	Select-Object -First 1
+
+if (-not $outputAab) {
+	$outputAab = Get-ChildItem -Path (Join-Path $scriptDir "bin") -Filter "*Signed.aab" -Recurse -ErrorAction SilentlyContinue |
+		Sort-Object LastWriteTime -Descending |
+		Select-Object -First 1
+}
 
 if (-not $outputAab) {
 	$outputAab = Get-ChildItem -Path (Join-Path $scriptDir "OpenRA.Android") -Filter "*Signed.aab" -Recurse -ErrorAction SilentlyContinue |
@@ -134,6 +140,22 @@ if ($outputAab) {
 	Write-Host "SUKCES! Gotowa, produkcyjnie podpisana paczka AAB:" -ForegroundColor Green
 	Write-Host $outputAab.FullName -ForegroundColor Yellow
 	Write-Host ("Rozmiar: {0:N2} MB" -f ($outputAab.Length / 1MB)) -ForegroundColor Cyan
+
+	# Weryfikacja podpisu
+	try {
+		$zip = [System.IO.Compression.ZipFile]::OpenRead($outputAab.FullName)
+		$hasDebugKey = $zip.Entries | Where-Object { $_.FullName -like "*ANDROIDD.RSA*" }
+		$zip.Dispose()
+		if ($hasDebugKey) {
+			Write-Host "`n[OSTRZEZENIE] Paczka zostala podpisana domyslnym kluczem deweloperskim (Android Debug), a nie nopenra-upload.keystore!" -ForegroundColor Red
+			Write-Host "Upewnij sie, ze haslo do magazynu kluczy jest poprawne." -ForegroundColor Yellow
+		} else {
+			Write-Host "Zweryfikowano podpis: paczka podpisana kluczem produkcyjnym!" -ForegroundColor Green
+		}
+	} catch {
+		Write-Host "Pominieto weryfikacje podpisu: $_" -ForegroundColor Gray
+	}
+
 	Write-Host "========================================================`n" -ForegroundColor Green
 
 	$uploadScript = Join-Path $scriptDir "upload-to-googleplay.py"
