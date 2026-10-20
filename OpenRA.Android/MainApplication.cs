@@ -4,6 +4,7 @@ using Android.Runtime;
 
 namespace OpenRA.Android
 {
+	[Register("eu.gfmm.nopenra.MainApplication")]
 	[Application(
 		Label = "nOpenRA Mobile",
 		Icon = "@mipmap/app_icon",
@@ -12,7 +13,7 @@ namespace OpenRA.Android
 		SupportsRtl = true,
 		HasCode = true,
 		ExtractNativeLibs = true,
-		ResizeableActivity = true,
+		ResizeableActivity = false,
 		RequestLegacyExternalStorage = true)]
 	public class MainApplication : Application
 	{

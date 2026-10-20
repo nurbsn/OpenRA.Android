@@ -1,7 +1,43 @@
 # Status Projektu: nOpenRA (Port Android)
 Data aktualizacji: 2026-10-20
 
-## 1. Wyjaśnienie odrzucenia w Google Play i status Wersji 4 (1.0.3)
+## 1. Rozwiązanie blokady inicjalizacji ekranu w SDL2 – Wersja v5 (1.0.4)
+
+### A. Diagnoza awarii na 4 zrzutach ekranu z Google Play (20 października)
+- **Komunikat z Google Play:** *"Awarie u użytkowników: Aplikacja otwiera się, ale ciągle ulega awariom"* (zrzuty ekranu ukazujące 4 różne urządzenia testowe Google zawieszone na czarnym ekranie ze wstępną ikoną systemowego splash screenu).
+- **Zidentyfikowana bezpośrednia przyczyna awarii (Hang / ANR na starcie):**
+  1. **Blokada inicjalizacji w `SDLSurface.java` (`Skip .. Surface is not ready`):**
+     - W bibliotece `sdl2.jar` metoda `surfaceChanged(SurfaceHolder, int, int width, int height)` zawierała warunek:
+       ```java
+       if ((n6 == 0 || n6 == 6) && this.mWidth < this.mHeight) {
+           Log.v("SDL", "Skip .. Surface is not ready.");
+           this.mIsSurfaceReady = false;
+           return;
+       }
+       ```
+     - Gdy urządzenie testowe Google otwiera aplikację w orientacji pionowej (domyślny stan fizyczny telefonów w labie testowym), `SDLSurface` odrzucało powierzchnię, ustawiało `mIsSurfaceReady = false` i przerywało inicjalizację.
+     - Ponieważ `SDLActivity.handleNativeState()` uruchamia wątek gry `mSDLThread` **wyłącznie wtedy, gdy `mIsSurfaceReady == true`**, silnik gry OpenRA **nigdy nie został uruchomiony**.
+     - Aplikacja wisiała w nieskończoność na czarnym ekranie splash screenu, co automat testowy Google zaklasyfikował jako awarię/zamrożenie przy starcie.
+  2. **Konflikt `resizeableActivity="true"` z wymuszeniem orientacji poziomej:**
+     - Od Androida 12+ flaga `resizeableActivity="true"` sprawia, że system ignoruje `screenOrientation="sensorLandscape"` na urządzeniach w labie testowym, pozostawiając okno w pionie i aktywując powyższy deadlock w SDL2.
+
+### B. Wdrożone rozwiązania w Wersji 5 (1.0.4)
+1. **Przebudowa i dekompilacja `sdl2.jar`:**
+   - Wyeliminowano z kodu `SDLSurface.java` blokadę `Skip .. Surface is not ready`.
+   - Powierzchnia graficzna jest teraz natychmiast konfigurowana i oznaczana jako gotowa (`mIsSurfaceReady = true`, `handleNativeState()`), niezależnie od tego, czy urządzenie znajduje się w pionie, poziomie czy trybie okienkowym.
+   - Skompilowano zaktualizowaną klasę `SDLSurface.class` za pomocą OpenJDK 21 z `android-36/android.jar` i zaktualizowano `OpenRA.Android/libs/sdl2.jar`.
+2. **Konfiguracja Manifestu i Aktywności:**
+   - Ustawiono `android:resizeableActivity="false"` w `AndroidManifest.xml` oraz w `MainApplication.cs`, gwarantując wymuszenie orientacji `sensorLandscape` w systemie Android.
+   - Dodano jawny atrybut `[Register("eu.gfmm.nopenra.MainApplication")]`.
+3. **Podbicie wersji do 5 (`1.0.4`):**
+   - `ApplicationVersion = 5`, `ApplicationDisplayVersion = 1.0.4` w `OpenRA.Android.csproj`.
+   - `versionCode = "5"`, `versionName = "1.0.4"` w `AndroidManifest.xml`.
+   - `AndroidVersion = "1.0.4"` w `Game.cs`.
+   - Zaktualizowane notatki do wydania w `upload-to-googleplay.py`.
+
+---
+
+## 2. Wyjaśnienie wcześniejszego odrzucenia wersji 3 i 4
 
 ### A. Diagnoza odrzucenia (20 października)
 - **Komunikat z Google Play:** *"Naruszenie zasad dotyczących nieprawidłowego działania – Awarie u użytkowników: Aplikacja otwiera się, ale ciągle ulega awariom. Wyegzekwowano: 20 paź"*.

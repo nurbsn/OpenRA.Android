@@ -5,8 +5,8 @@
     <OutputType>Exe</OutputType>
     <Nullable>disable</Nullable>
     <ApplicationId>eu.gfmm.nopenra</ApplicationId>
-    <ApplicationVersion>4</ApplicationVersion>
-    <ApplicationDisplayVersion>1.0.3</ApplicationDisplayVersion>
+    <ApplicationVersion>5</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.4</ApplicationDisplayVersion>
     <ApplicationTitle>nOpenRA Mobile</ApplicationTitle>
     <RootNamespace>OpenRA.Android</RootNamespace>
     <AssemblyName>OpenRA.Android</AssemblyName>

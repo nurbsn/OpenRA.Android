@@ -168,11 +168,11 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Poprawki stabilności: bezpośredni start SDLActivity z integracją MainApplication, eliminacja podwójnego splash screenu i pełna obsługa Android 15.'
+                'text': 'Poprawki stabilności: eliminacja blokady inicjalizacji powierzchni SDLSurface na urządzeniach pionowych, bezpośredni start silnika i pełna obsługa Android 15.'
             },
             {
                 'language': 'en-US',
-                'text': 'Stability improvements: direct SDLActivity startup with MainApplication lifecycle integration, eliminated splash transition glitches, and Android 15 compatibility.'
+                'text': 'Stability improvements: eliminated SDLSurface orientation initialization hang on portrait devices, direct engine startup, and Android 15 compatibility.'
             }
         ]
 
