@@ -125,21 +125,15 @@ Data aktualizacji: 2026-10-26
 ## 6. Procedura wdrożenia Wersji 6 do Google Play Console
 
 1. **Zbudowanie podpisanej paczki produkcyjnej AAB:**
-   - Uruchomienie skryptu w PowerShell:
-     ```powershell
-     .\build-android-release.ps1
-     ```
-   - Skrypt poprosi o hasło do oficjalnego magazynu kluczy `nopenra-upload.keystore`.
-   - Po podaniu hasła wygeneruje `bin\net10.0-android\publish\eu.gfmm.nopenra-Signed.aab`.
+   - Wygenerowano `bin\net10.0-android\publish\eu.gfmm.nopenra-Signed.aab` (wersja 6 / 1.0.5, rozmiar 94.36 MB, podpisana kluczem produkcyjnym `nopenra-upload.keystore`).
 
 2. **Wysłanie paczki do Google Play:**
-   - Wykonanie polecenia:
-     ```powershell
-     python upload-to-googleplay.py
-     ```
-   - Skrypt prześle paczkę v6 (1.0.5) z zaktualizowanymi notatkami i przypisze ją do ścieżki produkcyjnej.
+   - Skonfigurowano skrypt `upload-to-googleplay.py` z domyślną ścieżką `internal` (oraz opcją `--track production`).
+   - Wersja 6 (1.0.5) została pomyślnie wysłana i przypisana do:
+     - **Ścieżki produkcyjnej (`production`)** – oczekuje na weryfikację.
+     - **Ścieżki testów wewnętrznych (`internal`)** – status `completed`, natychmiastowa dostępność dla testerów oraz automatyczne uruchomienie testów Robo Crawler (Raport przed opublikowaniem).
 
 3. **Zatwierdzenie w Google Play Console:**
    - Wejście do [Google Play Console](https://play.google.com/console).
-   - Przejście do **Publikowanie** $\rightarrow$ **Przegląd publikowania**.
-   - Kliknięcie przycisku **„Prześlij do sprawdzenia”**.
+   - W sekcji **Testuj i publikuj** $\rightarrow$ **Testy wewnętrzne** wersja 6 jest natychmiast aktywna dla dodanych testerów.
+   - W sekcji **Przegląd publikowania** wydanie produkcyjne można przesłać do sprawdzenia.
