@@ -163,7 +163,9 @@ if ($outputAab) {
 	if (Test-Path $uploadScript) {
 		$sendChoice = Read-Host "Czy chcesz automatycznie przeslac te paczke do Google Play Console? (T/N) [Domyslnie: T]"
 		if ([string]::IsNullOrWhiteSpace($sendChoice) -or $sendChoice.ToUpper() -eq "T") {
-			python "$uploadScript" "$($outputAab.FullName)"
+			$trackChoice = Read-Host "Wybierz sciezke: 1 - Testy wewnetrzne (internal) [błyskawiczne], 2 - Produkcja (production) [Domyslnie: 1]"
+			$targetTrack = if ($trackChoice -eq "2") { "production" } else { "internal" }
+			python "$uploadScript" "$($outputAab.FullName)" --track $targetTrack
 		} else {
 			Write-Host "Pominiecie wysylania. Mozesz wgrac plik recznie w Google Play Console." -ForegroundColor Yellow
 		}

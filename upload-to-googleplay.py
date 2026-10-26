@@ -82,7 +82,7 @@ def find_aab():
     return None
 
 
-def upload_bundle(aab_path=None, track='production', status='completed', update_listings=True):
+def upload_bundle(aab_path=None, track='internal', status='completed', update_listings=False):
     if not os.path.exists(KEY_FILE):
         print(f"BLAD: Nie znaleziono pliku klucza API: {KEY_FILE}")
         sys.exit(1)
@@ -214,10 +214,12 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
 
         print("\n5. Zatwierdzanie zmian w Google Play Console (Commit)...")
         try:
-            service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
+            service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
         except HttpError as commit_err:
             commit_text = commit_err.content.decode('utf-8', errors='ignore')
-            if 'draft' not in track_body['releases'][0]['status'] and 'draft' in commit_text.lower():
+            if 'changesnotsentforreview' in commit_text.lower():
+                service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
+            elif 'draft' not in track_body['releases'][0]['status'] and 'draft' in commit_text.lower():
                 print("   Zmiana statusu wydania na 'draft' z powodu wymogow Google Play...")
                 track_body['releases'][0]['status'] = 'draft'
                 service.edits().tracks().update(
@@ -226,7 +228,10 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
                     track=track,
                     body=track_body
                 ).execute()
-                service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
+                try:
+                    service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
+                except Exception:
+                    service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
             else:
                 raise
         print("   SUKCES! Zmiany zostaly zatwierdzone w Google Play Console!")
@@ -240,5 +245,18 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
 
 
 if __name__ == '__main__':
-    aab = sys.argv[1] if len(sys.argv) > 1 else None
-    upload_bundle(aab)
+    import argparse
+    parser = argparse.ArgumentParser(description="Upload nOpenRA Mobile AAB to Google Play Console")
+    parser.add_argument("aab", nargs="?", default=None, help="Path to .aab file or track name (internal/production)")
+    parser.add_argument("--track", default="internal", choices=["internal", "production", "alpha", "beta"], help="Track to assign (default: internal)")
+    parser.add_argument("--status", default="completed", choices=["completed", "draft", "halted", "inProgress"], help="Release status (default: completed)")
+    parser.add_argument("--update-listings", action="store_true", default=False, help="Update store listing descriptions")
+    args, unknown = parser.parse_known_args()
+
+    aab_path = args.aab
+    track_name = args.track
+    if aab_path in ["internal", "production", "alpha", "beta"]:
+        track_name = aab_path
+        aab_path = None
+
+    upload_bundle(aab_path=aab_path, track=track_name, status=args.status, update_listings=args.update_listings)
