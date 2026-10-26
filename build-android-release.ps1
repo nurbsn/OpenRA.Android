@@ -10,6 +10,7 @@ $ErrorActionPreference = "Stop"
 
 $scriptDir = if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 if ([string]::IsNullOrWhiteSpace($scriptDir)) { $scriptDir = $PWD.Path }
+[System.IO.Directory]::SetCurrentDirectory($scriptDir)
 
 $keystoreFullPath = if ([System.IO.Path]::IsPathRooted($KeystoreFile)) { $KeystoreFile } else { Join-Path $scriptDir $KeystoreFile }
 $projectPath = Join-Path $scriptDir "OpenRA.Android\OpenRA.Android.csproj"
