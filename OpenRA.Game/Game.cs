@@ -58,7 +58,7 @@ namespace OpenRA
 		public static Sound Sound;
 
 		public static string EngineVersion { get; private set; }
-		public const string AndroidVersion = "1.0.5";
+		public const string AndroidVersion = "1.0.6";
 		public static string AppVersion => $"{EngineVersion} (Android v{AndroidVersion})";
 		public static LocalPlayerProfile LocalPlayerProfile;
 

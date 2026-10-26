@@ -12,7 +12,7 @@ namespace OpenRA.Android
 		Icon = "@mipmap/app_icon",
 		RoundIcon = "@mipmap/app_icon",
 		MainLauncher = false,
-		Exported = true,
+		Exported = false,
 		NoHistory = true,
 		ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.UiMode | ConfigChanges.KeyboardHidden,
 		ScreenOrientation = ScreenOrientation.SensorLandscape,

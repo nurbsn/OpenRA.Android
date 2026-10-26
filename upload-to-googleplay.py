@@ -171,11 +171,11 @@ def upload_bundle(aab_path=None, track='internal', status='completed', update_li
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Zintegrowane podstawowe zasoby gry dla natychmiastowego startu offline bez konieczności pobierania, pełna kompatybilność z Android 15 oraz poprawki stabilności.'
+                'text': 'Poprawka stabilności renderowania OpenGL ES na procesorach graficznych ARM Mali oraz urządzeniach fizycznych, obsługa wznawiania aplikacji i pełny start offline.'
             },
             {
                 'language': 'en-US',
-                'text': 'Integrated core game assets for immediate offline startup without additional downloads, Android 15 compatibility, and stability improvements.'
+                'text': 'Stability fix for OpenGL ES rendering on ARM Mali GPUs and physical devices, proper task resume handling, and instant offline gameplay.'
             }
         ]
 

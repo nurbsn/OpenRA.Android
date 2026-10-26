@@ -13,7 +13,7 @@ namespace OpenRA.Android
 		SupportsRtl = true,
 		HasCode = true,
 		ExtractNativeLibs = true,
-		ResizeableActivity = false,
+		ResizeableActivity = true,
 		RequestLegacyExternalStorage = true)]
 	public class MainApplication : Application
 	{

@@ -334,8 +334,15 @@ namespace OpenRA.Graphics
 				if (pass.Type != type || !pass.Enabled)
 					continue;
 
-				Game.Renderer.Flush();
-				pass.Draw(this);
+				try
+				{
+					Game.Renderer.Flush();
+					pass.Draw(this);
+				}
+				catch (Exception ex)
+				{
+					Log.Write("graphics", $"Post-processing pass {pass.GetType().Name} failed: {ex}");
+				}
 			}
 		}
 
