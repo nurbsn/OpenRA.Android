@@ -68,6 +68,7 @@ namespace OpenRA.Android
 				try
 				{
 					AssetExtractor.EnsureAssetsExtracted(context, gameDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
+					AssetExtractor.EnsureContentExtracted(context, supportDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
 				}
 				catch (Exception ex)
 				{
@@ -83,6 +84,7 @@ namespace OpenRA.Android
 						Platform.OverrideEngineDir(gameDir);
 						Platform.OverrideSupportDir(supportDir);
 						AssetExtractor.EnsureAssetsExtracted(context, gameDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
+						AssetExtractor.EnsureContentExtracted(context, supportDir, msg => Console.WriteLine($"[OpenRA.Android] {msg}"));
 					}
 					else
 					{

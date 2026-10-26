@@ -55,3 +55,8 @@ update.log
 *.keystore
 *.jks
 gen-lang-client-*.json
+
+# Python
+__pycache__/
+*.pyc
+

@@ -71,11 +71,14 @@ def find_aab():
         os.path.join("bin", "net10.0-android", "**", "*Signed.aab"),
         os.path.join("OpenRA.Android", "bin", "Release", "net10.0-android", "**", "*Signed.aab"),
     ]
+    all_matches = []
     for pattern in patterns:
         matches = glob.glob(pattern, recursive=True)
-        if matches:
-            matches.sort(key=os.path.getmtime, reverse=True)
-            return matches[0]
+        all_matches.extend(matches)
+    if all_matches:
+        all_matches = list(set(all_matches))
+        all_matches.sort(key=os.path.getmtime, reverse=True)
+        return all_matches[0]
     return None
 
 
@@ -168,11 +171,11 @@ def upload_bundle(aab_path=None, track='production', status='completed', update_
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Poprawki stabilności: eliminacja blokady inicjalizacji powierzchni SDLSurface na urządzeniach pionowych, bezpośredni start silnika i pełna obsługa Android 15.'
+                'text': 'Zintegrowane podstawowe zasoby gry dla natychmiastowego startu offline bez konieczności pobierania, pełna kompatybilność z Android 15 oraz poprawki stabilności.'
             },
             {
                 'language': 'en-US',
-                'text': 'Stability improvements: eliminated SDLSurface orientation initialization hang on portrait devices, direct engine startup, and Android 15 compatibility.'
+                'text': 'Integrated core game assets for immediate offline startup without additional downloads, Android 15 compatibility, and stability improvements.'
             }
         ]
 

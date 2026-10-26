@@ -5,8 +5,8 @@
     <OutputType>Exe</OutputType>
     <Nullable>disable</Nullable>
     <ApplicationId>eu.gfmm.nopenra</ApplicationId>
-    <ApplicationVersion>5</ApplicationVersion>
-    <ApplicationDisplayVersion>1.0.4</ApplicationDisplayVersion>
+    <ApplicationVersion>6</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.5</ApplicationDisplayVersion>
     <ApplicationTitle>nOpenRA Mobile</ApplicationTitle>
     <RootNamespace>OpenRA.Android</RootNamespace>
     <AssemblyName>OpenRA.Android</AssemblyName>
@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="assets\openra-data.zip" />
+    <AndroidAsset Include="assets\ra-content.zip" Condition="Exists('assets\ra-content.zip')" />
   </ItemGroup>
   <ItemGroup>
     <AndroidLibrary Include="libs\sdl2.jar" Bind="false" />

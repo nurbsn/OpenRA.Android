@@ -3,6 +3,18 @@ $dest = "OpenRA.Android/assets/openra-data.zip"
 New-Item -ItemType Directory -Force -Path "OpenRA.Android/assets" | Out-Null
 if (Test-Path $dest) { Remove-Item $dest }
 
+# Ensure bundled Red Alert game content is present in assets
+$raContentDest = "OpenRA.Android/assets/ra-content.zip"
+if (-not (Test-Path $raContentDest)) {
+    if (Test-Path "ra-quickinstall.zip") {
+        Write-Host "Copying ra-quickinstall.zip to $raContentDest..."
+        Copy-Item "ra-quickinstall.zip" $raContentDest
+    } else {
+        Write-Host "Downloading ra-quickinstall.zip for bundled content..."
+        Invoke-WebRequest -Uri "https://openra.ppmsite.com/ra-quickinstall.zip" -OutFile $raContentDest
+    }
+}
+
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
