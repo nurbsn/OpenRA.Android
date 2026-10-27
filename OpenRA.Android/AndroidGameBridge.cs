@@ -29,11 +29,80 @@ namespace OpenRA.Android
 			}
 		}
 
+		public static void ApplyImmersiveFullscreen()
+		{
+			try
+			{
+				Console.WriteLine("[AndroidGameBridge] Applying immersive sticky fullscreen mode...");
+				var classRef = global::Android.Runtime.JNIEnv.FindClass("org/libsdl/app/SDLActivity");
+				if (classRef != IntPtr.Zero)
+				{
+					var getContextMethod = global::Android.Runtime.JNIEnv.GetStaticMethodID(classRef, "getContext", "()Landroid/content/Context;");
+					if (getContextMethod != IntPtr.Zero)
+					{
+						var activityPtr = global::Android.Runtime.JNIEnv.CallStaticObjectMethod(classRef, getContextMethod);
+						if (activityPtr != IntPtr.Zero)
+						{
+							var activity = Java.Lang.Object.GetObject<global::Android.App.Activity>(activityPtr, global::Android.Runtime.JniHandleOwnership.DoNotTransfer);
+							activity?.RunOnUiThread(() =>
+							{
+								try
+								{
+									var window = activity.Window;
+									if (window != null)
+									{
+										window.AddFlags(global::Android.Views.WindowManagerFlags.Fullscreen | global::Android.Views.WindowManagerFlags.KeepScreenOn);
+										window.ClearFlags(global::Android.Views.WindowManagerFlags.ForceNotFullscreen);
+
+										if (global::Android.OS.Build.VERSION.SdkInt >= global::Android.OS.BuildVersionCodes.R)
+										{
+											window.SetDecorFitsSystemWindows(false);
+											var controller = window.InsetsController;
+											if (controller != null)
+											{
+												controller.Hide(global::Android.Views.WindowInsets.Type.SystemBars());
+												controller.SystemBarsBehavior = (int)global::Android.Views.WindowInsetsControllerBehavior.ShowTransientBarsBySwipe;
+											}
+										}
+										else
+										{
+											var flags = global::Android.Views.SystemUiFlags.ImmersiveSticky
+												| global::Android.Views.SystemUiFlags.Fullscreen
+												| global::Android.Views.SystemUiFlags.HideNavigation
+												| global::Android.Views.SystemUiFlags.LayoutStable
+												| global::Android.Views.SystemUiFlags.LayoutFullscreen
+												| global::Android.Views.SystemUiFlags.LayoutHideNavigation;
+											window.DecorView.SystemUiVisibility = (global::Android.Views.StatusBarVisibility)flags;
+										}
+									}
+								}
+								catch (Exception ex)
+								{
+									Console.WriteLine($"[AndroidGameBridge] Failed to configure window insets: {ex.Message}");
+								}
+							});
+						}
+					}
+
+					var setWindowStyle = global::Android.Runtime.JNIEnv.GetStaticMethodID(classRef, "setWindowStyle", "(Z)V");
+					if (setWindowStyle != IntPtr.Zero)
+						global::Android.Runtime.JNIEnv.CallStaticVoidMethod(classRef, setWindowStyle, new global::Android.Runtime.JValue(true));
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"[AndroidGameBridge] ApplyImmersiveFullscreen error: {ex.Message}");
+			}
+		}
+
 		public static void RunManagedGame(IntPtr env, IntPtr clazz)
 		{
 			Console.WriteLine("[AndroidGameBridge] runManagedGame called from SDLThread!");
 			try
 			{
+				ApplyImmersiveFullscreen();
+				Game.OnShellmapLoaded += ApplyImmersiveFullscreen;
+
 				var context = global::Android.App.Application.Context;
 				NativeLibraryResolver.Initialize();
 
@@ -143,6 +212,9 @@ namespace OpenRA.Android
 				{
 					"Game.Mod=" + activeMod,
 					"Graphics.GLProfile=Embedded",
+					"Graphics.Mode=Fullscreen",
+					"Graphics.CapFramerate=True",
+					"Graphics.MaxFramerate=60",
 					"Game.MouseControlStyle=Classic",
 					"Game.MouseScroll=Standard",
 					"Game.ViewportEdgeScroll=False",

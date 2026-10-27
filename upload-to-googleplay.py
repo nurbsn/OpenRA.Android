@@ -171,11 +171,11 @@ def upload_bundle(aab_path=None, track='internal', status='completed', update_li
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Poprawka stabilności renderowania OpenGL ES na procesorach graficznych ARM Mali oraz urządzeniach fizycznych, obsługa wznawiania aplikacji i pełny start offline.'
+                'text': 'Wcześniejsze wersje były testowane na emulatorze gier Google Play i na nim te błędy nie występowały. Wersja 1.0.7 została przetestowana na urządzeniu fizycznym: naprawiono wyświetlanie mgły wojennej, wyeliminowano przycinanie animacji, ukryto paski systemowe (pełny tryb immersyjny) oraz powiększono przyciski szybkich akcji.'
             },
             {
                 'language': 'en-US',
-                'text': 'Stability fix for OpenGL ES rendering on ARM Mali GPUs and physical devices, proper task resume handling, and instant offline gameplay.'
+                'text': 'Previous versions were tested on Google Play Games emulator where these issues did not appear. Version 1.0.7 was tested on a physical device: fixed fog of war rendering, eliminated animation stuttering, hid system bars (full immersive mode), and enlarged quick action buttons.'
             }
         ]
 

@@ -46,16 +46,16 @@ Container@PLAYER_WIDGETS:
 			Logic: CommandBarLogic
 			X: 6
 			Y: 60
-			Width: 36
-			Height: 405
+			Width: 42
+			Height: 465
 			Children:
 				LogicKeyListener@MODIFIER_OVERRIDES:
 				Button@ATTACK_MOVE:
 					Logic: AddFactionSuffixLogic
 					X: 0
 					Y: 0
-					Width: 36
-					Height: 26
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: AttackMove
@@ -66,16 +66,16 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: BUTTON_WITH_DESC_HIGHLIGHT_TOOLTIP
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: attack-move
 				Button@FORCE_MOVE:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 27
-					Width: 36
-					Height: 26
+					Y: 31
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -85,16 +85,16 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: BUTTON_WITH_DESC_HIGHLIGHT_TOOLTIP
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: force-move
 				Button@FORCE_ATTACK:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 54
-					Width: 36
-					Height: 26
+					Y: 62
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -104,16 +104,16 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: BUTTON_WITH_DESC_HIGHLIGHT_TOOLTIP
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: force-attack
 				Button@GUARD:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 81
-					Width: 36
-					Height: 26
+					Y: 93
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: Guard
@@ -123,16 +123,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: guard
 				Button@DEPLOY:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 108
-					Width: 36
-					Height: 26
+					Y: 124
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: Deploy
@@ -143,16 +143,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: deploy
 				Button@SCATTER:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 135
-					Width: 36
-					Height: 26
+					Y: 155
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: Scatter
@@ -163,16 +163,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: scatter
 				Button@STOP:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 162
-					Width: 36
-					Height: 26
+					Y: 186
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: Stop
@@ -183,16 +183,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: stop
 				Button@QUEUE_ORDERS:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 189
-					Width: 36
-					Height: 26
+					Y: 217
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -202,16 +202,16 @@ Container@PLAYER_WIDGETS:
 					TooltipTemplate: BUTTON_WITH_DESC_HIGHLIGHT_TOOLTIP
 					Children:
 						Image@ICON:
-							X: 6
-							Y: 1
+							X: 9
+							Y: 3
 							ImageCollection: command-icons
 							ImageName: queue-orders
 				Button@SELECT_ALL:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 216
-					Width: 36
-					Height: 26
+					Y: 248
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -223,9 +223,9 @@ Container@PLAYER_WIDGETS:
 				Button@DESELECT:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 243
-					Width: 36
-					Height: 26
+					Y: 279
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -238,9 +238,9 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_1:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 270
-					Width: 36
-					Height: 26
+					Y: 310
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -250,9 +250,9 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_2:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 297
-					Width: 36
-					Height: 26
+					Y: 341
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -262,9 +262,9 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_3:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 324
-					Width: 36
-					Height: 26
+					Y: 372
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -274,9 +274,9 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_4:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 351
-					Width: 36
-					Height: 26
+					Y: 403
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -286,9 +286,9 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_5:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 378
-					Width: 36
-					Height: 26
+					Y: 434
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
@@ -298,16 +298,16 @@ Container@PLAYER_WIDGETS:
 		Container@STANCE_BAR:
 			Logic: StanceSelectorLogic
 			X: 6
-			Y: 470
-			Width: 36
-			Height: 108
+			Y: 535
+			Width: 42
+			Height: 124
 			Children:
 				Button@STANCE_ATTACKANYTHING:
 					Logic: AddFactionSuffixLogic
 					X: 0
 					Y: 0
-					Width: 36
-					Height: 26
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: StanceAttackAnything
@@ -318,16 +318,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 10
-							Y: 5
+							X: 13
+							Y: 7
 							ImageCollection: stance-icons
 							ImageName: attack-anything
 				Button@STANCE_DEFEND:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 27
-					Width: 36
-					Height: 26
+					Y: 31
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: StanceDefend
@@ -338,16 +338,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 10
-							Y: 5
+							X: 13
+							Y: 7
 							ImageCollection: stance-icons
 							ImageName: defend
 				Button@STANCE_RETURNFIRE:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 54
-					Width: 36
-					Height: 26
+					Y: 62
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: StanceReturnFire
@@ -358,16 +358,16 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 10
-							Y: 5
+							X: 13
+							Y: 7
 							ImageCollection: stance-icons
 							ImageName: return-fire
 				Button@STANCE_HOLDFIRE:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 81
-					Width: 36
-					Height: 26
+					Y: 93
+					Width: 42
+					Height: 30
 					VisualHeight: 0
 					Background: command-button
 					Key: StanceHoldFire
@@ -378,8 +378,8 @@ Container@PLAYER_WIDGETS:
 					TooltipContainer: TOOLTIP_CONTAINER
 					Children:
 						Image@ICON:
-							X: 10
-							Y: 5
+							X: 13
+							Y: 7
 							ImageCollection: stance-icons
 							ImageName: hold-fire
 		Container@MUTE_INDICATOR:

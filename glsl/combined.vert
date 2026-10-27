@@ -1,4 +1,8 @@
 #version {VERSION}
+#ifdef GL_ES
+precision highp float;
+precision highp int;
+#endif
 
 uniform vec3 Scroll;
 uniform vec3 p1, p2;

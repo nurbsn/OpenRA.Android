@@ -1,6 +1,7 @@
 #version {VERSION}
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
+precision highp int;
 #endif
 
 uniform sampler2D Texture0;
@@ -201,9 +202,8 @@ void main()
 	{
 		vec4 y = Sample(vDepthSampler, vTexCoord.pq);
 		depth = depth + DepthTextureScale * dot(y, vDepthMask);
+		gl_FragDepth = depth;
 	}
-
-	gl_FragDepth = depth;
 
 	if (EnableDepthPreview)
 	{

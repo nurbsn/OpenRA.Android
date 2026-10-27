@@ -1,6 +1,7 @@
 #version {VERSION}
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
+precision highp int;
 #endif
 
 uniform float Blend;
