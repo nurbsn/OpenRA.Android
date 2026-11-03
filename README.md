@@ -7,15 +7,15 @@
 <a name="english"></a>
 ## English
 
-**OpenRA for Android** is an open-source, mobile port of the [OpenRA](https://www.openra.net) Real-Time Strategy engine running natively on Android with touch-first ergonomics, hardware-accelerated OpenGL ES graphics, and modern .NET runtime.
+**OpenRA for Android** is an open-source mobile port of the [OpenRA](https://www.openra.net) Real-Time Strategy engine running natively on Android with touch-first ergonomics, hardware-accelerated OpenGL ES 3.0 graphics, and modern .NET runtime.
 
-### 📸 Screenshots / Zrzuty ekranu
+### 📸 Screenshots
 
-| Menu główne | Lobby potyczki | Rozbudowa bazy |
+| Main Menu | Skirmish Lobby | Base Expansion |
 | :---: | :---: | :---: |
 | <img src="store_screenshots/screenshot_1_ra_main_menu.png" width="280" /> | <img src="store_screenshots/screenshot_2_ra_skirmish_lobby.png" width="280" /> | <img src="store_screenshots/screenshot_3_ra_base_building.png" width="280" /> |
 
-| Natarcie pancerne | Obrona bazowa (Wieża Tesli) |
+| Armored Strike Force | Base Defense (Tesla Coil) |
 | :---: | :---: |
 | <img src="store_screenshots/screenshot_4_ra_combat.png" width="280" /> | <img src="store_screenshots/screenshot_5_ra_tesla_defense.png" width="280" /> |
 
@@ -42,7 +42,7 @@
   - In-game mod downloader with preset links, progress reporting, and auto-extraction.
   - Custom data directory selection (e.g. `/storage/emulated/0/OpenRA`) bypassing Android 11+ scoped storage restrictions.
 - **Multilingual & Localization**:
-  - Dedicated Language & Translations tab in Settings with support for English and Polish (Polski).
+  - Dedicated Language & Translations tab in Settings with full support for English and Polish.
 
 ### 🛠️ Building & Packaging
 #### Prerequisites:
@@ -63,19 +63,37 @@
    ```
 3. Build the release APK:
    ```bash
-   dotnet build OpenRA.Android/OpenRA.Android.csproj -c Release -p:AndroidPackageFormat=apk
+   pwsh -File build-apk.ps1
+   # or build directly with dotnet:
+   dotnet publish OpenRA.Android/OpenRA.Android.csproj -f net10.0-android -c Release -p:AndroidPackageFormat=apk
    ```
 4. Install on device or emulator:
    ```bash
-   adb install -r bin/net10.0-android/android-x64/org.openra.android-Signed.apk
+   pwsh -File build-apk.ps1 -Install
+   # or install directly via adb:
+   adb install -r bin/net10.0-android/publish/eu.gfmm.nopenra-Signed.apk
    ```
+
+### ⚖️ License & Disclaimer
+OpenRA is distributed under the terms of the GNU General Public License v3.0 (GPLv3). See [COPYING](COPYING) for details.  
+This project is an independent community port and is not affiliated with, endorsed, or sponsored by Electronic Arts Inc.
 
 ---
 
 <a name="polski"></a>
 ## Polski
 
-**OpenRA for Android** to otwartoźródłowy port silnika strategii czasu rzeczywistego [OpenRA](https://www.openra.net) dla systemu Android, działający natywnie na runtime .NET z akceleracją OpenGL ES oraz dedykowanym, ergonomicznym sterowaniem dotykowym.
+**OpenRA for Android** to otwartoźródłowy port silnika strategii czasu rzeczywistego [OpenRA](https://www.openra.net) dla systemu Android, działający natywnie na runtime .NET z akceleracją OpenGL ES 3.0 oraz dedykowanym, ergonomicznym sterowaniem dotykowym.
+
+### 📸 Zrzuty ekranu
+
+| Menu główne | Lobby potyczki | Rozbudowa bazy |
+| :---: | :---: | :---: |
+| <img src="store_screenshots/screenshot_1_ra_main_menu.png" width="280" /> | <img src="store_screenshots/screenshot_2_ra_skirmish_lobby.png" width="280" /> | <img src="store_screenshots/screenshot_3_ra_base_building.png" width="280" /> |
+
+| Natarcie pancerne | Obrona bazy (Wieża Tesli) |
+| :---: | :---: |
+| <img src="store_screenshots/screenshot_4_ra_combat.png" width="280" /> | <img src="store_screenshots/screenshot_5_ra_tesla_defense.png" width="280" /> |
 
 ### 🎮 Obsługiwane gry i mody
 - **Command & Conquer: Red Alert** (`ra`)
@@ -100,7 +118,7 @@
   - Pobieranie modów z sieci z poziomu gry (pole URL, presety, pasek postępu, automatyczne rozpakowywanie).
   - Wybór własnego katalogu pamięci (np. `/storage/emulated/0/OpenRA`), omijający ograniczenia Androida 11+ (*Scoped Storage*).
 - **Obsługa wielu języków (Język i Tłumaczenia)**:
-  - Dedykowana zakładka w menu ustawień z możliwością wyboru języka (English / Polski).
+  - Dedykowana zakładka w menu ustawień z pełnym wsparciem dla języka polskiego i angielskiego.
 
 ### 🛠️ Kompilacja i instalacja
 #### Wymagania:
@@ -121,15 +139,17 @@
    ```
 3. Zbuduj pakiet instalacyjny APK:
    ```bash
-   dotnet build OpenRA.Android/OpenRA.Android.csproj -c Release -p:AndroidPackageFormat=apk
+   pwsh -File build-apk.ps1
+   # lub bezpośrednio przez dotnet:
+   dotnet publish OpenRA.Android/OpenRA.Android.csproj -f net10.0-android -c Release -p:AndroidPackageFormat=apk
    ```
 4. Zainstaluj na urządzeniu lub emulatorze:
    ```bash
-   adb install -r bin/net10.0-android/android-x64/org.openra.android-Signed.apk
+   pwsh -File build-apk.ps1 -Install
+   # lub bezpośrednio przez adb:
+   adb install -r bin/net10.0-android/publish/eu.gfmm.nopenra-Signed.apk
    ```
 
----
-
-## Licencja / License
-OpenRA jest projektem na licencji GPLv3. Szczegóły w pliku [COPYING](COPYING).  
-EA nie wspiera ani nie autoryzuje tego projektu.
+### ⚖️ Licencja i oświadczenie
+OpenRA jest projektem udostępnianym na warunkach licencji GNU General Public License v3.0 (GPLv3). Szczegóły w pliku [COPYING](COPYING).  
+Projekt jest niezależnym przedsięwzięciem społecznościowym i nie jest powiązany z firmą Electronic Arts Inc., ani przez nią sponsorowany czy autoryzowany.
