@@ -1,71 +1,85 @@
 # Status Projektu: nOpenRA (Port Android)
-Data aktualizacji: 2026-10-27
+Data aktualizacji: 2026-11-03
 
-## 1. Poprawki graficzne, UI i pełnego ekranu – Wersja v8 (1.0.7)
+## 1. Oficjalne zrzuty ekranu dla sklepu Google Play (1920x1080) – ZAKOŃCZONE
 
-### A. Zgłoszone problemy po testach na urządzeniu fizycznym (Xiaomi 11T / Android 14)
-1. **Paski telefonu (pasek stanu u góry i pasek nawigacyjny z prawej) przesłaniały UI:**
-   - Brakowało wymuszenia flagi `SDL_WINDOW_FULLSCREEN` w oknie SDL oraz wywołania nowoczesnego API `WindowInsetsController` dla trybu `ImmersiveSticky`.
-2. **Mgła wojenna (szary/czarny shroud) wyświetlała się z poziomymi pasami:**
-   - W shaderze `glsl/combined.frag` precyzja zmiennoprzecinkowa była ustawiona na `mediump float` (FP16 – zaledwie 10 bitów mantysy). Ponieważ głębokość Z zależy liniowo od współrzędnej Y ekranu, 10-bitowa kwantyzacja głębokości powodowała schodkowanie i z-fighting (naprzemienne paski w miejscach styku mgły z terenem).
-   - Dodatkowo shader bezwarunkowo nadpisywał `gl_FragDepth = depth;`, wyłączając sprzętowy Early-Z i precyzję bufora rastrującego.
-3. **Animacje dziwnie przeskakiwały / przycinały:**
-   - Przy arkuszach sprajtów o rozmiarze 2048x2048 precyzja `mediump` (10 bitów mantysy = 1024 stany) nie była w stanie dokładnie zaadresować pojedynczego teksla, powodując przeskakiwanie współrzędnych UV o 2 piksele na klatkę.
-   - Brak limitera klatek (`CapFramerate=False`) na ekranach 120Hz prowadził do nieregularnego buforowania klatek logicznych gry względem VSync.
-4. **Przyciski szybkich akcji (po lewej stronie) były zbyt małe:**
-   - Przyciski paska rozkazów miały rozmiar 36x26 px.
+Wszystkie 5 wymaganych zrzutów ekranu w rozdzielczości 1920x1080 zostało pomyślnie przechwyconych bezpośrednio z działającej instancji gry na emulatorze Google Play Games Developer Emulator (`localhost:6520`) i zweryfikowanych pod kątem poprawności wizualnej, rozdzielczości i zawartości.
 
-### B. Wdrożone rozwiązania w Wersji 8 (1.0.7)
-1. **Pełny tryb immersyjny (`Immersive Sticky`) bez pasków systemowych:**
-   - W `OpenRA.Platforms.Default/Sdl2PlatformWindow.cs`: włączono flagę `SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN` na Androidzie przy tworzeniu okna i wywołano `SDL_SetWindowFullscreen`.
-   - W `OpenRA.Android/AndroidGameBridge.cs`: dodano metodę `ApplyImmersiveFullscreen()`, która bezpośrednio przez JNI pobiera aktywność `SDLActivity` i konfiguruje `WindowInsetsController.Hide(systemBars())` z zachowaniem `ShowTransientBarsBySwipe` oraz flagi `WindowManagerFlags.Fullscreen`.
-2. **Eliminacja pasów mgły wojennej i poprawa precyzji shaderów:**
-   - W `glsl/combined.frag`: zmieniono precyzję na `precision highp float; precision highp int;` (pełne 32-bitowe IEEE 754 floaty w OpenGL ES 3.0+).
-   - Zmodyfikowano zapis do `gl_FragDepth`: bufor głębokości jest nadpisywany wyłącznie wtedy, gdy sprajt faktycznie zawiera dodatkową maskę głębokości (`length(vDepthMask) > 0.0`), co pozwala GPU na zachowanie pełnej, sprzętowej precyzji bufora 24-bit oraz optymalizacji Early-Z.
-   - Podbito do `highp` również `glsl/combined.vert`, `glsl/model.frag` oraz wszystkie shadery post-processingu (`glsl/postprocess_*.frag`).
-3. **Płynność animacji i stabilny frame pacing:**
-   - Pełna precyzja `highp` w próbkowaniu teksli wyeliminowała skakanie UV w animacjach.
-   - W `AndroidGameBridge.cs` ustawiono parametry startowe `"Graphics.CapFramerate=True"`, `"Graphics.MaxFramerate=60"`, co synchronizuje pętlę renderowania z logiką gry i eliminuje mikrozacięcia.
-4. **Powiększenie przycisków szybkich akcji o ~15%:**
-   - W `mods/ra/chrome/ingame-player.yaml`:
-     - Pasek rozkazów (`Container@COMMAND_BAR`): szerokość z 36 do 42 px, wysokość z 405 do 465 px.
-     - Przyciski (15 przycisków: ruch, atak, stop, ALL, X, grupy 1-5 itd.): powiększone z 36x26 px na **42x30 px** (skok Y z 27 na 31 px).
-     - Pasek postaw (`Container@STANCE_BAR`): przesunięty na Y: 535, przyciski powiększone do **42x30 px**.
-   - Zaktualizowano i spakowano paczkę `openra-data.zip` (2540 plików).
-5. **Aktualizacja opisu wydania i podbicie wersji:**
-   - Podbito wersję do **8 (`1.0.7`)** w `OpenRA.Android.csproj`, `AndroidManifest.xml` oraz `Game.cs`.
-   - Zaktualizowano notatki wydania w `upload-to-googleplay.py` o informację o testach na fizycznym urządzeniu.
+Pliki zostały zsynchronizowane w katalogach:
+- `D:\Dokumenty\antigravityProjects\nOpenRA\store_screenshots\`
+- `C:\Users\nurbs\.gemini\antigravity\brain\189c9089-e65f-425c-8675-9d41a85d0178\`
+
+### Wykaz zrzutów:
+1. **`screenshot_1_ra_main_menu.png`** (3 792 791 B, 1920x1080):
+   - Menu główne moda Red Alert: stylizowany radziecki motyw z czerwoną gwiazdą i sierpem/młotem, animowane tło mapy, czytelne spolszczone menu nawigacyjne przy skali UI 1.75.
+2. **`screenshot_2_ra_skirmish_lobby.png`** (2 163 867 B, 1920x1080):
+   - Lobby potyczki (*Skirmish*): wybór frakcji ZSRR, konfiguracja graczy AI, podgląd minimapy, sloty dowódców, polska lokalizacja UI.
+3. **`screenshot_3_ra_base_building.png`** (967 213 B, 1920x1080):
+   - Rozbudowa bazy w fazie wczesnej/średniej: rozłożony Plac Budowy (MCV), elektrownie jądrowe/cieplne, koszary, rafineria rudy oraz aktywny zbieracz (Harvester) dostarczający surowce.
+4. **`screenshot_4_ra_combat.png`** (1 705 480 B, 1920x1080):
+   - Radziecka formacja pancerna w natarciu bojowym: transportery opancerzone (APC), pojazdy przeciwlotnicze (Mobile Flak) i czołg ciężki (Heavy Tank) uformowane w szyk bojowy na przedpolu bazy w asyście Fabryki Wojennej i Wieży Tesli.
+5. **`screenshot_5_ra_tesla_defense.png`** (1 710 052 B, 1920x1080):
+   - W pełni operacyjna obrona bazy z działającą **Wieżą Tesli** (`Tesla Coil`): rozłożona na zachodnim skrzydle bazy z widocznym wskaźnikiem naładowania, w otoczeniu kompleksu energetycznego (4 elektrownie, zasilanie 310) i 2 rafinerii.
 
 ---
 
-## 2. Rozwiązanie awarii po 10-12s na telefonach fizycznych (Mali GPU) – Wersja v7 (1.0.6)
-- **Przyczyna:** Błąd `GL_INVALID_ENUM` przy `glCopyTexImage2D` z formatem `GL_BGRA` w shaderze `MenuPostProcessEffect`.
-- **Rozwiązanie:** Zmiana formatu na `OpenGL.GL_RGBA` i zabezpieczenie blokiem `try-catch`.
+## 2. Inżynieria sterowania dotykowego i automatyzacji na Androidzie
+
+W toku realizacji zadania zdekodowano i zaimplementowano precyzyjną automatyzację interfejsu OpenRA dla ekranów dotykowych i emulatora Android:
+
+### A. Architektura wejścia i mapowanie palety produkcyjnej (`ProductionPaletteWidget.cs`)
+- **Skróty klawiaturowe zakładek produkcji:**
+  - Budynki (`Building`): Klawisz `E` (`KEYCODE_E` = 33)
+  - Obrona (`Defense`): Klawisz `R` (`KEYCODE_R` = 46)
+  - Piechota (`Infantry`): Klawisz `T` (`KEYCODE_T` = 48)
+  - Pojazdy (`Vehicle`): Klawisz `Y` (`KEYCODE_Y` = 53)
+- **Klawisze funkcyjne slotów palety produkcyjnej:**
+  - Siatka 3 kolumny: Slot 1..3 (Wiersz 1) = `F1`..`F3` (kody 131–133), Slot 4..6 (Wiersz 2) = `F4`..`F6` (kody 134–136), Slot 7..9 (Wiersz 3) = `F7`..`F9` (kody 137–139).
+  - Wciśnięcie klawisza pustego slotu uruchamia budowę; wciśnięcie klawisza gotowego budynku (`item.Done`) podnosi go do kursora rozmieszczenia (`PickUpCompletedBuildingIcon`).
+
+### B. Współrzędne dotykowe (Tap Targets) w rozdzielczości 1920x1080 (UI Scale 1.75)
+- **Pasek rozkazów (lewy):**
+  - Zaznacz wszystkie jednostki (`SELECT_ALL`): `(40, 390)`
+  - Rozłóż bazę / rozpakuj MCV (`DEPLOY`): `(40, 204)`
+- **Pasek boczny (prawy, X: 1630–1880, Y: 440–680):**
+  - Wiersz 1: Col 1 `(1675, 480)`, Col 2 `(1755, 480)`, Col 3 `(1835, 480)`
+  - Wiersz 2: Col 1 `(1675, 560)`, Col 2 `(1755, 560)`, Col 3 `(1835, 560)`
+  - Wiersz 3: Col 1 `(1675, 640)`, Col 2 `(1755, 640)`, Col 3 `(1835, 640)`
+- **Pozycje budynków w bazie (Vegetation):**
+  - Plac Budowy (MCV): `(960, 500)`
+  - Elektrownie 1 & 2 (wschód): `(1060, 480)`, `(1060, 360)`
+  - Elektrownie 3 & 4 (zachód / północ): `(860, 380)`, `(1060, 240)`
+  - Rafinerie rudy 1 & 2 (południe): `(960, 670)`, `(1100, 670)`
+  - Fabryka Wojenna (południowy zachód): `(830, 670)`
+  - Wieża Tesli (wysunięta obrona zachodnia): `(760, 500)`
+
+### C. Deterministyczny detektor ukończenia budowy (`GOTOWE`)
+- Wyeliminowano podatność na błędy timeoutów poprzez bezpośrednią analizę bufora klatki screencap:
+  - Napis `"GOTOWE"` na ikonie slotu renderowany jest z charakterystycznym żółtym konturem RGB (`R > 190, G > 170, B < 60`).
+  - Liczba żółtych pikseli podczas budowy wynosi `0`, po ukończeniu skacze do `> 200`.
 
 ---
 
-## 3. Rozwiązanie odrzucenia Google Play (Broken Functionality) – Wersja v6 (1.0.5)
-- **Przyczyna:** Brak lokalnych plików gry przy czystej instalacji.
-- **Rozwiązanie:** Dołączenie oficjalnych darmowych zasobów Red Alert (`ra-content.zip`) i automatyczne rozpakowywanie przy pierwszym starcie (`AssetExtractor.cs`).
+## 3. Stan techniczny portu – Wersja v8 (1.0.7)
+
+- **Platforma docelowa:** Android (API 26-34) / Google Play Games Developer Emulator (`localhost:6520`) / Urządzenia fizyczne x86_64 i ARM64.
+- **Płynność i frame pacing:** `Graphics.CapFramerate=True`, `Graphics.MaxFramerate=60`.
+- **Shadery:** Pełna precyzja `highp float` i `highp int` w OpenGL ES 3.0, brak artefaktów na shaderze mgły wojennej (`combined.frag`).
+- **Tryb pełnoekranowy:** Wymuszony `ImmersiveSticky` przez `WindowInsetsController`, brak przesłaniania UI przez paski systemowe.
+- **Wielkość przycisków:** Przyciski paska rozkazów powiększone do 42x30 px, czytelne i responsywne.
 
 ---
 
-## 4. Narzędzia i pliki wdrożeniowe
-- **Klucz podpisu (Upload Keystore):** `nopenra-upload.keystore` (Alias: `nopenra`).
-- **Skrypt budujący:** `.\build-android-release.ps1`.
-- **Konto serwisowe Google Cloud API:** `gen-lang-client-0077146295-3ea3b88c5e9f.json`.
-- **Skrypt wysyłający:** `python upload-to-googleplay.py --track internal` (lub `--track production`).
+## 4. Środowisko i narzędzia
+
+- **ADB:** `C:\Program Files (x86)\Android\android-sdk\platform-tools\adb.exe`
+- **Emulator:** Google Play Games on PC Developer Emulator (`localhost:6520`)
+- **Skrypt budujący:** `.\build-android-release.ps1`
+- **Klucz podpisu (Keystore):** `nopenra-upload.keystore` (Alias: `nopenra`)
+- **Konto serwisowe Google Cloud:** `gen-lang-client-0077146295-3ea3b88c5e9f.json`
+- **Skrypt publikacji do Google Play:** `python upload-to-googleplay.py --track internal` (lub `--track production`)
 
 ---
 
-## 5. Następne kroki do publikacji wersji 8 (1.0.7)
-1. Zbudowanie podpisanej paczki produkcyjnej (AAB):
-   ```powershell
-   .\build-android-release.ps1 -SkipAssetPackaging
-   ```
-   *(flaga `-SkipAssetPackaging` wykorzysta już przygotowany i zweryfikowany plik `openra-data.zip`).*
-2. Wysłanie paczki do Google Play:
-   ```powershell
-   python upload-to-googleplay.py --track internal
-   ```
-   (lub `--track production`).
+## 5. Podsumowanie i gotowość projektu
+Zadanie przygotowania i wygenerowania oficjalnego zestawu zrzutów ekranu w rozdzielczości 1920x1080 zostało w 100% zrealizowane. Wszystkie materiały graficzne oraz zaktualizowany kod są gotowe do publikacji w sklepie Google Play.

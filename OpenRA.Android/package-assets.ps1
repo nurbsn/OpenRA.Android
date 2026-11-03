@@ -43,7 +43,9 @@ Write-Host "Creating $dest..."
 $zip = [System.IO.Compression.ZipFile]::Open($dest, [System.IO.Compression.ZipArchiveMode]::Create)
 
 $searchDirs = @("mods", "glsl") | ForEach-Object { Join-Path $repoRoot $_ } | Where-Object { Test-Path $_ }
-$files = Get-ChildItem -Path $searchDirs -Recurse -File
+$files = Get-ChildItem -Path $searchDirs -Recurse -File | Where-Object {
+    $_.FullName -notmatch '[\\/]mods[\\/](ts|ts-content)([\\/]|$)'
+}
 $prefix = if ($repoRoot.EndsWith("\") -or $repoRoot.EndsWith("/")) { $repoRoot } else { $repoRoot + "\" }
 $count = 0
 foreach ($f in $files) {

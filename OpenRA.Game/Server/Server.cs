@@ -248,7 +248,8 @@ namespace OpenRA.Server
 				{
 					try
 					{
-						listener.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 1);
+						if (endpoint.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+							listener.Server.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, 1);
 					}
 					catch (Exception ex) when (ex is SocketException || ex is ArgumentException)
 					{

@@ -208,8 +208,10 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							Game.SwitchMod(modId);
 					});
 
-				// Skip internal content installer helper packages and composite all
-				if (modId.EndsWith("-content", StringComparison.OrdinalIgnoreCase) || modId.Equals("all", StringComparison.OrdinalIgnoreCase))
+				// Skip internal content installer helper packages, composite all, and unbundled/disabled mods (ts)
+				if (modId.EndsWith("-content", StringComparison.OrdinalIgnoreCase)
+					|| modId.Equals("all", StringComparison.OrdinalIgnoreCase)
+					|| modId.Equals("ts", StringComparison.OrdinalIgnoreCase))
 					continue;
 
 				var isActive = modId == currentModId;

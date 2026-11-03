@@ -60,3 +60,8 @@ gen-lang-client-*.json
 __pycache__/
 *.pyc
 
+# Local Scratch & Temporary files
+/scratch/
+/*.png
+mods/polanie/
+

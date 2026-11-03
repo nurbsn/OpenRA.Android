@@ -58,7 +58,7 @@ namespace OpenRA
 		public static Sound Sound;
 
 		public static string EngineVersion { get; private set; }
-		public const string AndroidVersion = "1.0.7";
+		public const string AndroidVersion = "1.0.8";
 		public static string AppVersion => $"{EngineVersion} (Android v{AndroidVersion})";
 		public static LocalPlayerProfile LocalPlayerProfile;
 
@@ -702,6 +702,15 @@ namespace OpenRA
 
 		public static void SwitchToExternalMod(ExternalMod mod, string[] launchArguments = null, Action onFailed = null)
 		{
+			if (OperatingSystem.IsAndroid())
+			{
+				if (Mods != null && Mods.TryGetValue(mod.Id, out var modManifest))
+				{
+					RunAfterTick(() => InitializeMod(modManifest, new Arguments(launchArguments ?? Array.Empty<string>())));
+					return;
+				}
+			}
+
 			try
 			{
 				var path = mod.LaunchPath;

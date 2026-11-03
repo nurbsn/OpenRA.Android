@@ -12,52 +12,57 @@ SCOPES = ['https://www.googleapis.com/auth/androidpublisher']
 
 STORE_LISTINGS = {
     'pl-PL': {
-        'title': 'nOpenRA Mobile (RTS Engine)',
-        'shortDescription': 'Mobilny port otwartoźródłowego silnika strategii czasu rzeczywistego OpenRA.',
+        'title': 'Red Tide RTS: Classic Warfare',
+        'shortDescription': 'Klasyczna strategia czasu rzeczywistego (RTS). Buduj bazę i walcz offline!',
         'fullDescription': (
-            'nOpenRA Mobile to otwartoźródłowy port silnika strategii czasu rzeczywistego (RTS) OpenRA '
-            'przystosowany do ekranów dotykowych systemu Android.\n\n'
-            'NAJWAŻNIEJSZE FUNKCJE:\n'
-            '• Dedykowane sterowanie dotykowe: płynne przewijanie mapy (swipe), przybliżanie dwoma palcami (pinch-to-zoom) '
-            'oraz zaznaczanie obszarowe z kołowym wskaźnikiem przytrzymania.\n'
-            '• Panel szybkich akcji: przycisk zaznaczania wszystkich jednostek na ekranie (ALL), szybkie odznaczanie (X) '
-            'oraz 5 grup jednostek z licznikami na żywo.\n'
-            '• Wbudowany Menedżer Modów: przełączanie aktywnej gry i modyfikacji w locie bez restartu aplikacji, '
-            'pobieranie modów społeczności z sieci oraz wybór własnego folderu danych i map.\n'
-            '• Wielojęzyczny interfejs: obsługa języka polskiego i angielskiego.\n\n'
+            'Red Tide RTS: Classic Warfare to mobilna, otwartoźródłowa gra strategiczna czasu rzeczywistego (RTS), '
+            'zaprojektowana z myślą o ekranach dotykowych systemu Android.\n\n'
+            'Doświadcz prawdziwej, klasycznej rozgrywki RTS znanej ze złotego wieku gier strategicznych lat 90.: '
+            'zbieraj surowce, rozbudowuj bazę, odkrywaj technologie i dowodź potężnymi armiami na lądzie, w powietrzu i na wodzie – '
+            'całkowicie za darmo, w 100% bez mikropłatności i bez pay-to-win!\n\n'
+            'NAJWAŻNIEJSZE CECHY ROZGRYWKI (RTS):\n'
+            '• Prawdziwa strategia czasu rzeczywistego: brak sztucznych liczników energii, brak mikropłatności, czysta taktyka i refleks.\n'
+            '• Budowanie baz i zarządzanie zasobami: stawiaj elektrownie, koszary, rafinerie i fabryki, zabezpieczaj linie zaopatrzenia.\n'
+            '• Zróżnicowane siły zbrojne: czołgi, artyleria, żołnierze, śmigłowce, myśliwce oraz okręty podwodne i krążowniki.\n'
+            '• Pełna rozgrywka OFFLINE: graj w dowolnym miejscu bez dostępu do internetu w trybie Potyczki (Skirmish) przeciwko botom AI o różnym poziomie trudności.\n'
+            '• Intuicyjne sterowanie dotykowe: płynne przesuwanie kamery (swipe), przybliżanie dwoma palcami (pinch-to-zoom) oraz szybkie zaznaczanie ramką (hold-to-select).\n'
+            '• Pasek szybkiego dowodzenia: natychmiastowe zaznaczanie wszystkich jednostek (ALL), rozpraszanie, odznaczanie (X) oraz 5 niezależnych grup armii.\n'
+            '• Wbudowany Menedżer Modów: obsługa klasycznych modyfikacji gier strategicznych (m.in. Red Alert, Tiberian Dawn, Dune 2000) z możliwością instalowania dodatkowych map i modów społeczności.\n'
+            '• Pełna polska i angielska wersja językowa interfejsu.\n\n'
             'INFORMACJE PRAWNE I LICENCJA (GPLv3):\n'
-            'To jest nieoficjalny, tworzony przez społeczność port otwartoźródłowego silnika OpenRA, '
-            'udostępniany na licencji GNU General Public License v3.0 (GPLv3).\n'
-            'Kod źródłowy: https://github.com/nurbsn/OpenRA.Android\n\n'
+            'Red Tide RTS jest niezależnym, tworzonym przez społeczność projektem opartym na otwartoźródłowym silniku OpenRA, '
+            'rozpowszechnianym na warunkach licencji GNU General Public License v3.0 (GPLv3).\n'
+            'Pełny kod źródłowy: https://github.com/nurbsn/OpenRA.Android\n\n'
             'OŚWIADCZENIE (DISCLAIMER):\n'
-            'Aplikacja nie jest powiązana, wspierana ani autoryzowana przez Electronic Arts Inc., Westwood Studios '
-            'ani oficjalny zespół OpenRA. Nazwy Command & Conquer, Red Alert, Tiberian Dawn oraz Dune 2000 są '
-            'zastrzeżonymi znakami towarowymi odpowiednich właścicieli i zostały użyte wyłącznie w celach informacyjnych '
-            'dotyczących kompatybilności silnika.'
+            'Ta aplikacja nie jest powiązana, autoryzowana ani wspierana przez Electronic Arts Inc., Westwood Studios '
+            'ani oficjalnych twórców projektu OpenRA. Znaki towarowe Command & Conquer, Red Alert, Tiberian Dawn oraz Dune 2000 '
+            'należą do ich prawowitych właścicieli i zostały użyte wyłącznie w celach informacyjnych.'
         )
     },
     'en-US': {
-        'title': 'nOpenRA Mobile (RTS Engine)',
-        'shortDescription': 'Mobile port of the open-source OpenRA Real-Time Strategy game engine.',
+        'title': 'Red Tide RTS: Classic Warfare',
+        'shortDescription': 'Classic Real-Time Strategy (RTS). Build bases and command armies offline!',
         'fullDescription': (
-            'nOpenRA Mobile is a community-driven Android port of the open-source OpenRA Real-Time Strategy (RTS) '
-            'engine featuring touch-first controls and hardware-accelerated OpenGL ES graphics.\n\n'
-            'KEY FEATURES:\n'
-            '• Touch-First Controls: smooth swipe camera scrolling, two-finger pinch-to-zoom, and hold-to-box-select '
-            'with a customizable circular progress indicator.\n'
-            '• Quick Action Bar: select all visible units (ALL), clear selection (X), and manage 5 control groups '
-            'with live unit counters.\n'
-            '• Built-in Mod & Content Manager: switch active mods in-process without restarting, download community '
-            'mods from URLs, and configure custom storage directories for maps and mods.\n'
+            'Red Tide RTS: Classic Warfare is a touch-optimized mobile Real-Time Strategy (RTS) game '
+            'powered by an open-source tactical engine.\n\n'
+            'Experience true classic 90s-era RTS gameplay: harvest resources, construct bases, research advanced tech trees, '
+            'and command massive armies across land, air, and sea. 100% free, open-source, with zero pay-to-win mechanics or timers!\n\n'
+            'KEY RTS FEATURES:\n'
+            '• Pure Real-Time Strategy: no energy timers, no pay-to-win, no microtransactions — purely skill, strategy, and tactics.\n'
+            '• Base Construction & Economy: build power plants, barracks, ore refineries, and war factories to sustain your warmachine.\n'
+            '• Diverse Combat Units: tanks, mobile artillery, rocket infantry, attack helicopters, jet fighters, submarines, and cruisers.\n'
+            '• Full OFFLINE Support: play anytime, anywhere without an internet connection in Skirmish mode against intelligent AI commanders.\n'
+            '• Touch-First Controls: smooth camera panning, responsive pinch-to-zoom, and hold-to-box-select with a visual hold ring.\n'
+            '• Quick Action Command Bar: instant select-all (ALL), scatter, cancel selection (X), and 5 army control groups with live unit counters.\n'
+            '• In-game Mod & Content Manager: switch between supported classic mods (including Red Alert, Tiberian Dawn, Dune 2000) and download community maps.\n'
             '• Multilingual UI: full support for English and Polish.\n\n'
             'OPEN SOURCE & LICENSE (GPLv3):\n'
-            'This application is distributed under the GNU General Public License v3.0 (GPLv3).\n'
+            'Red Tide RTS is an independent community project powered by the open-source OpenRA engine, licensed under the GNU General Public License v3.0 (GPLv3).\n'
             'Source code: https://github.com/nurbsn/OpenRA.Android\n\n'
             'LEGAL DISCLAIMER:\n'
-            'This is an unofficial community port of the OpenRA engine and is not affiliated with, endorsed, or '
-            'sponsored by Electronic Arts Inc., Westwood Studios, or the official OpenRA project. '
-            'Command & Conquer, Red Alert, Tiberian Dawn, and Dune 2000 are registered trademarks of their '
-            'respective owners and are referenced solely to indicate engine compatibility.'
+            'This application is an independent community project and is not affiliated with, endorsed, or sponsored by Electronic Arts Inc., '
+            'Westwood Studios, or the official OpenRA developers. Command & Conquer, Red Alert, Tiberian Dawn, and Dune 2000 are registered '
+            'trademarks of their respective owners and are mentioned solely for compatibility and reference purposes.'
         )
     }
 }
@@ -244,6 +249,57 @@ def upload_bundle(aab_path=None, track='internal', status='completed', update_li
         sys.exit(1)
 
 
+def update_listings_only():
+    if not os.path.exists(KEY_FILE):
+        print(f"BLAD: Nie znaleziono pliku klucza API: {KEY_FILE}")
+        sys.exit(1)
+
+    print("=== Aktualizacja opisów w Google Play (bez wgrywania nowej paczki AAB) ===")
+    print(f"Pakiet (ApplicationId): {PACKAGE_NAME}")
+
+    try:
+        credentials = service_account.Credentials.from_service_account_file(
+            KEY_FILE, scopes=SCOPES
+        )
+        service = build('androidpublisher', 'v3', credentials=credentials)
+
+        print("\n1. Tworzenie sesji edycji w Google Play...")
+        edit = service.edits().insert(body={}, packageName=PACKAGE_NAME).execute()
+        edit_id = edit['id']
+        print(f"   Sesja utworzona (Edit ID: {edit_id})")
+
+        print("\n2. Zapisywanie zoptymalizowanych opisów ASO (pl-PL oraz en-US)...")
+        for lang, listing_data in STORE_LISTINGS.items():
+            try:
+                service.edits().listings().update(
+                    packageName=PACKAGE_NAME,
+                    editId=edit_id,
+                    language=lang,
+                    body=listing_data
+                ).execute()
+                print(f"   [OK] Zaktualizowano kartę sklepu dla języka: {lang}")
+            except Exception as listing_err:
+                print(f"   [BŁĄD] Nie udało się zaktualizować {lang}: {listing_err}")
+
+        print("\n3. Zatwierdzanie zmian w Google Play Console (Commit)...")
+        try:
+            service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id).execute()
+        except HttpError as commit_err:
+            commit_text = commit_err.content.decode('utf-8', errors='ignore')
+            if 'changesnotsentforreview' in commit_text.lower():
+                service.edits().commit(packageName=PACKAGE_NAME, editId=edit_id, changesNotSentForReview=True).execute()
+            else:
+                raise
+
+        print("\n========================================================")
+        print("SUKCES! Opisy i słowa kluczowe w Sklepie Play zostały zaktualizowane!")
+        print("========================================================")
+
+    except Exception as e:
+        print(f"\nBLAD PODCZAS AKTUALIZACJI OPISOW: {e}")
+        sys.exit(1)
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Upload nOpenRA Mobile AAB to Google Play Console")
@@ -251,7 +307,12 @@ if __name__ == '__main__':
     parser.add_argument("--track", default="internal", choices=["internal", "production", "alpha", "beta"], help="Track to assign (default: internal)")
     parser.add_argument("--status", default="completed", choices=["completed", "draft", "halted", "inProgress"], help="Release status (default: completed)")
     parser.add_argument("--update-listings", action="store_true", default=False, help="Update store listing descriptions")
+    parser.add_argument("--listings-only", action="store_true", default=False, help="Update store listings ONLY (without uploading AAB)")
     args, unknown = parser.parse_known_args()
+
+    if args.listings_only:
+        update_listings_only()
+        sys.exit(0)
 
     aab_path = args.aab
     track_name = args.track

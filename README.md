@@ -9,6 +9,16 @@
 
 **OpenRA for Android** is an open-source, mobile port of the [OpenRA](https://www.openra.net) Real-Time Strategy engine running natively on Android with touch-first ergonomics, hardware-accelerated OpenGL ES graphics, and modern .NET runtime.
 
+### 📸 Screenshots / Zrzuty ekranu
+
+| Menu główne | Lobby potyczki | Rozbudowa bazy |
+| :---: | :---: | :---: |
+| <img src="store_screenshots/screenshot_1_ra_main_menu.png" width="280" /> | <img src="store_screenshots/screenshot_2_ra_skirmish_lobby.png" width="280" /> | <img src="store_screenshots/screenshot_3_ra_base_building.png" width="280" /> |
+
+| Natarcie pancerne | Obrona bazowa (Wieża Tesli) |
+| :---: | :---: |
+| <img src="store_screenshots/screenshot_4_ra_combat.png" width="280" /> | <img src="store_screenshots/screenshot_5_ra_tesla_defense.png" width="280" /> |
+
 ### 🎮 Supported Games & Mods
 - **Command & Conquer: Red Alert** (`ra`)
 - **Command & Conquer: Tiberian Dawn** (`cnc`)

@@ -45,35 +45,15 @@ Container@PLAYER_WIDGETS:
 		Container@COMMAND_BAR:
 			Logic: CommandBarLogic
 			X: 6
-			Y: 60
+			Y: 28
 			Width: 42
-			Height: 465
+			Height: 434
 			Children:
 				LogicKeyListener@MODIFIER_OVERRIDES:
-				Button@ATTACK_MOVE:
-					Logic: AddFactionSuffixLogic
-					X: 0
-					Y: 0
-					Width: 42
-					Height: 30
-					VisualHeight: 0
-					Background: command-button
-					Key: AttackMove
-					DisableKeySound: true
-					TooltipText: button-command-bar-attack-move.tooltip
-					TooltipDesc: button-command-bar-attack-move.tooltipdesc
-					TooltipContainer: TOOLTIP_CONTAINER
-					TooltipTemplate: BUTTON_WITH_DESC_HIGHLIGHT_TOOLTIP
-					Children:
-						Image@ICON:
-							X: 9
-							Y: 3
-							ImageCollection: command-icons
-							ImageName: attack-move
 				Button@FORCE_MOVE:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 31
+					Y: 0
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -92,7 +72,7 @@ Container@PLAYER_WIDGETS:
 				Button@FORCE_ATTACK:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 62
+					Y: 31
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -111,7 +91,7 @@ Container@PLAYER_WIDGETS:
 				Button@GUARD:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 93
+					Y: 62
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -130,7 +110,7 @@ Container@PLAYER_WIDGETS:
 				Button@DEPLOY:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 124
+					Y: 93
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -150,7 +130,7 @@ Container@PLAYER_WIDGETS:
 				Button@SCATTER:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 155
+					Y: 124
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -170,7 +150,7 @@ Container@PLAYER_WIDGETS:
 				Button@STOP:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 186
+					Y: 155
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -190,7 +170,7 @@ Container@PLAYER_WIDGETS:
 				Button@QUEUE_ORDERS:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 217
+					Y: 186
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -209,7 +189,7 @@ Container@PLAYER_WIDGETS:
 				Button@SELECT_ALL:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 248
+					Y: 217
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -223,7 +203,7 @@ Container@PLAYER_WIDGETS:
 				Button@DESELECT:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 279
+					Y: 248
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -238,7 +218,7 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_1:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 310
+					Y: 279
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -250,7 +230,7 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_2:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 341
+					Y: 310
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -262,7 +242,7 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_3:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 372
+					Y: 341
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -274,7 +254,7 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_4:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 403
+					Y: 372
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -286,7 +266,7 @@ Container@PLAYER_WIDGETS:
 				Button@GROUP_5:
 					Logic: AddFactionSuffixLogic
 					X: 0
-					Y: 434
+					Y: 403
 					Width: 42
 					Height: 30
 					VisualHeight: 0
@@ -298,7 +278,7 @@ Container@PLAYER_WIDGETS:
 		Container@STANCE_BAR:
 			Logic: StanceSelectorLogic
 			X: 6
-			Y: 535
+			Y: 470
 			Width: 42
 			Height: 124
 			Children:

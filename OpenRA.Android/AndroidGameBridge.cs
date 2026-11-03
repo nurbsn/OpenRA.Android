@@ -18,7 +18,11 @@ namespace OpenRA.Android
 					new JniNativeMethodRegistration(
 						"runManagedGame",
 						"()V",
-						(Action<IntPtr, IntPtr>)RunManagedGame)
+						(Action<IntPtr, IntPtr>)RunManagedGame),
+					new JniNativeMethodRegistration(
+						"nativeOnTouchEvent",
+						"(IIII)V",
+						(Action<IntPtr, IntPtr, int, int, int, int>)OnNativeTouchEvent)
 				};
 				JniEnvironment.Types.RegisterNatives(sdlClass, methods, methods.Length);
 				Console.WriteLine("[AndroidGameBridge] Successfully registered JNI methods for SDLActivity!");
@@ -27,6 +31,11 @@ namespace OpenRA.Android
 			{
 				Console.WriteLine($"[AndroidGameBridge] Error registering JNI methods: {ex}");
 			}
+		}
+
+		static void OnNativeTouchEvent(IntPtr env, IntPtr clazz, int action, int pointerId, int x, int y)
+		{
+			// No-op: touch events are already natively delivered to the SDL event queue via SDLSurface
 		}
 
 		public static void ApplyImmersiveFullscreen()
