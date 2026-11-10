@@ -41,6 +41,13 @@ namespace OpenRA.Mods.Common.Widgets
 
 	public class ProductionPaletteWidget : Widget
 	{
+		const int QueueButtonWidth = 42;
+		const int QueueButtonHeight = 36;
+		const int QueueButtonSpacing = 4;
+		const int QueueButtonCount = 6;
+		const int TotalQueuePanelHeight = QueueButtonCount * QueueButtonHeight + (QueueButtonCount - 1) * QueueButtonSpacing;
+		const int QueuePanelMargin = 4;
+
 		public enum ReadyTextStyleOptions { Solid, AlternatingColor, Blinking }
 		public readonly ReadyTextStyleOptions ReadyTextStyle = ReadyTextStyleOptions.AlternatingColor;
 		public readonly Color TextColor = Color.White;
@@ -112,6 +119,7 @@ namespace OpenRA.Mods.Common.Widgets
 			set
 			{
 				currentQueue = value;
+				selectedIcon = null;
 				if (currentQueue != null)
 					UpdateCachedProductionIconOverlays();
 
@@ -119,7 +127,28 @@ namespace OpenRA.Mods.Common.Widgets
 			}
 		}
 
-		public override Rectangle EventBounds => eventBounds;
+		enum QueueButtonType { AddFive, SubtractOne, PauseResume, CancelAll, SetRallyPoint, Close }
+		ProductionIcon selectedIcon;
+		QueueButtonType? pressedQueueButton;
+		SpriteFont boldFont;
+
+		public override Rectangle EventBounds
+		{
+			get
+			{
+				if (selectedIcon != null)
+				{
+					var panelRect = GetQueuePanelRect();
+					if (eventBounds.IsEmpty)
+						return panelRect;
+
+					return Rectangle.Union(eventBounds, panelRect);
+				}
+
+				return eventBounds;
+			}
+		}
+
 		Dictionary<Rectangle, ProductionIcon> icons = [];
 		Animation cantBuild;
 		Animation clock;
@@ -179,6 +208,8 @@ namespace OpenRA.Mods.Common.Widgets
 
 			overlayFont = Game.Renderer.Fonts[OverlayFont];
 			Game.Renderer.Fonts.TryGetValue(SymbolsFont, out symbolFont);
+			if (!Game.Renderer.Fonts.TryGetValue("Bold", out boldFont))
+				boldFont = overlayFont;
 
 			iconOffset = 0.5f * IconSize.ToVector2() + IconSpriteOffset.ToVector2();
 			HoldText = FluentProvider.GetMessage(HoldText);
@@ -246,6 +277,20 @@ namespace OpenRA.Mods.Common.Widgets
 
 				RefreshIcons();
 			}
+
+			if (selectedIcon != null)
+			{
+				if (World.OrderGenerator is PlaceBuildingOrderGenerator || CurrentQueue == null)
+					selectedIcon = null;
+				else
+				{
+					var currentSelected = icons.Values.FirstOrDefault(i => i.Name == selectedIcon.Name);
+					if (currentSelected == null && !CurrentQueue.AllItems().Any(a => a.Name == selectedIcon.Name))
+						selectedIcon = null;
+					else if (currentSelected != null)
+						selectedIcon = currentSelected;
+				}
+			}
 		}
 
 		public override void MouseEntered()
@@ -261,8 +306,200 @@ namespace OpenRA.Mods.Common.Widgets
 				tooltipContainer.Value.RemoveTooltip();
 		}
 
+		Rectangle GetQueuePanelRect()
+		{
+			var parentBounds = Parent != null ? Parent.RenderBounds : RenderBounds;
+
+			var panelX = parentBounds.X - QueueButtonWidth - QueuePanelMargin;
+			var panelY = parentBounds.Y + 4;
+
+			if (panelX < 0)
+				panelX = 0;
+
+			var screenHeight = Game.Renderer.Resolution.Height;
+			if (panelY + TotalQueuePanelHeight > screenHeight - 4)
+				panelY = Math.Max(0, screenHeight - TotalQueuePanelHeight - 4);
+
+			return new Rectangle(panelX, panelY, QueueButtonWidth, TotalQueuePanelHeight);
+		}
+
+		Rectangle GetQueueButtonRect(int index)
+		{
+			var panel = GetQueuePanelRect();
+			return new Rectangle(panel.X, panel.Y + index * (QueueButtonHeight + QueueButtonSpacing), panel.Width, QueueButtonHeight);
+		}
+
+		Actor GetRallyProducer()
+		{
+			var selectedBuilding = World.Selection.Actors.FirstOrDefault(a => a.Owner == World.LocalPlayer && a.TraitOrDefault<RallyPoint>() != null);
+			if (selectedBuilding != null)
+				return selectedBuilding;
+
+			if (CurrentQueue == null)
+				return null;
+
+			var producer = CurrentQueue.MostLikelyProducer();
+			return producer.Trait != null ? producer.Actor : null;
+		}
+
+		void HandleQueueButtonClick(QueueButtonType type)
+		{
+			if (selectedIcon == null || CurrentQueue == null)
+				return;
+
+			var queuedItems = CurrentQueue.AllQueued().Where(a => a.Item == selectedIcon.Name).ToList();
+			var firstItem = queuedItems.FirstOrDefault();
+
+			switch (type)
+			{
+				case QueueButtonType.AddFive:
+				{
+					var buildable = CurrentQueue.BuildableItems().FirstOrDefault(a => a.Name == selectedIcon.Name);
+					if (buildable != null)
+					{
+						if (CurrentQueue.Info.PayUpFront &&
+							currentQueue.GetProductionCost(buildable) > CurrentQueue.Actor.Owner.PlayerActor.Trait<PlayerResources>().GetCashAndResources())
+						{
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+							return;
+						}
+
+						var canQueue = CurrentQueue.CanQueue(buildable, out var notification, out var textNotification);
+						if (!CurrentQueue.AllQueued().Any())
+						{
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Speech", notification, World.LocalPlayer.Faction.InternalName);
+							TextNotificationsManager.AddTransientLine(World.LocalPlayer, textNotification);
+						}
+
+						if (canQueue)
+						{
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+							World.IssueOrder(Order.StartProduction(CurrentQueue.Actor, selectedIcon.Name, 5, true));
+						}
+						else
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+					}
+					else
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+
+					break;
+				}
+
+				case QueueButtonType.SubtractOne:
+				{
+					if (queuedItems.Count > 0)
+					{
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Speech", CurrentQueue.Info.CancelledAudio, World.LocalPlayer.Faction.InternalName);
+						TextNotificationsManager.AddTransientLine(World.LocalPlayer, CurrentQueue.Info.CancelledTextNotification);
+						World.IssueOrder(Order.CancelProduction(CurrentQueue.Actor, selectedIcon.Name, 1));
+					}
+					else
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+
+					break;
+				}
+
+				case QueueButtonType.PauseResume:
+				{
+					if (firstItem != null && !CurrentQueue.Info.DisallowPaused)
+					{
+						if (firstItem.Paused)
+						{
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Speech", CurrentQueue.Info.QueuedAudio, World.LocalPlayer.Faction.InternalName);
+							TextNotificationsManager.AddTransientLine(World.LocalPlayer, CurrentQueue.Info.QueuedTextNotification);
+							World.IssueOrder(Order.PauseProduction(CurrentQueue.Actor, selectedIcon.Name, false));
+						}
+						else
+						{
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+							Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Speech", CurrentQueue.Info.OnHoldAudio, World.LocalPlayer.Faction.InternalName);
+							TextNotificationsManager.AddTransientLine(World.LocalPlayer, CurrentQueue.Info.OnHoldTextNotification);
+							World.IssueOrder(Order.PauseProduction(CurrentQueue.Actor, selectedIcon.Name, true));
+						}
+					}
+					else
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+
+					break;
+				}
+
+				case QueueButtonType.CancelAll:
+				{
+					if (queuedItems.Count > 0)
+					{
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Speech", CurrentQueue.Info.CancelledAudio, World.LocalPlayer.Faction.InternalName);
+						TextNotificationsManager.AddTransientLine(World.LocalPlayer, CurrentQueue.Info.CancelledTextNotification);
+						World.IssueOrder(Order.CancelProduction(CurrentQueue.Actor, selectedIcon.Name, queuedItems.Count));
+					}
+					else
+						Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickDisabledSound, null);
+
+					break;
+				}
+
+				case QueueButtonType.SetRallyPoint:
+				{
+					var rallyProducer = GetRallyProducer();
+					var rp = rallyProducer?.TraitOrDefault<RallyPoint>();
+					if (rallyProducer != null && rp != null)
+					{
+						Game.Sound.PlayNotification(World.Map.Rules, null, "Sounds", ClickSound, null);
+						if (World.OrderGenerator is SetRallyPointOrderGenerator)
+							World.CancelInputMode();
+						else
+							World.OrderGenerator = new SetRallyPointOrderGenerator(rallyProducer, rp);
+					}
+					else
+						Game.Sound.PlayNotification(World.Map.Rules, null, "Sounds", ClickDisabledSound, null);
+
+					break;
+				}
+
+				case QueueButtonType.Close:
+				{
+					Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+					if (World.OrderGenerator is SetRallyPointOrderGenerator)
+						World.CancelInputMode();
+
+					selectedIcon = null;
+					break;
+				}
+			}
+		}
+
 		public override bool HandleMouseInput(MouseInput mi)
 		{
+			if (selectedIcon != null)
+			{
+				var panelRect = GetQueuePanelRect();
+				if (panelRect.Contains(mi.Location))
+				{
+					if (mi.Event == MouseInputEvent.Down)
+					{
+						for (var i = 0; i < QueueButtonCount; i++)
+						{
+							var btnRect = GetQueueButtonRect(i);
+							if (btnRect.Contains(mi.Location))
+							{
+								pressedQueueButton = (QueueButtonType)i;
+								HandleQueueButtonClick((QueueButtonType)i);
+								break;
+							}
+						}
+					}
+					else if (mi.Event == MouseInputEvent.Up)
+						pressedQueueButton = null;
+
+					return true;
+				}
+			}
+
+			if (mi.Event == MouseInputEvent.Up)
+				pressedQueueButton = null;
+
 			var icon = icons.Where(i => i.Key.Contains(mi.Location))
 				.Select(i => i.Value).FirstOrDefault();
 
@@ -291,6 +528,12 @@ namespace OpenRA.Mods.Common.Widgets
 			// Eat mouse-up events
 			if (mi.Event != MouseInputEvent.Down)
 				return true;
+
+			var item = icon.Queued.FirstOrDefault();
+			if (item != null && item.Done && World.Map.Rules.Actors[item.Item].HasTraitInfo<BuildingInfo>())
+				selectedIcon = null;
+			else
+				selectedIcon = icon;
 
 			return HandleEvent(icon, mi.Button, mi.Modifiers);
 		}
@@ -637,10 +880,199 @@ namespace OpenRA.Mods.Common.Widgets
 						icon.Pos + BulkOffset, TextColor, Color.Black, 1);
 				}
 			}
+
+			// Queue Control Panel
+			if (selectedIcon != null && CurrentQueue != null)
+			{
+				var selEntry = icons.FirstOrDefault(kvp => kvp.Value.Name == selectedIcon.Name);
+				if (selEntry.Value != null)
+				{
+					var selRect = selEntry.Key;
+					var selTl = new Vector3(selRect.Left, selRect.Top, 0);
+					var selBr = new Vector3(selRect.Right, selRect.Bottom, 0);
+					Game.Renderer.RgbaColorRenderer.DrawRect(selTl, selBr, 2, Color.Gold);
+				}
+
+				var panelRect = GetQueuePanelRect();
+				var bgRect = new Rectangle(panelRect.X - 2, panelRect.Y - 2, panelRect.Width + 4, panelRect.Height + 4);
+				WidgetUtils.FillRectWithColor(bgRect, Color.FromArgb(190, 15, 15, 20));
+				Game.Renderer.RgbaColorRenderer.DrawRect(
+					new Vector3(bgRect.Left, bgRect.Top, 0),
+					new Vector3(bgRect.Right, bgRect.Bottom, 0),
+					1, Color.FromArgb(140, 70, 70, 75));
+
+				var queuedItems = CurrentQueue.AllQueued().Where(a => a.Item == selectedIcon.Name).ToList();
+				var firstItem = queuedItems.FirstOrDefault();
+				var isPaused = firstItem != null && firstItem.Paused;
+
+				var rallyProducer = GetRallyProducer();
+				var hasRallyPoint = rallyProducer != null && rallyProducer.TraitOrDefault<RallyPoint>() != null;
+				var isRallyActive = World.OrderGenerator is SetRallyPointOrderGenerator;
+
+				var font = boldFont ?? overlayFont;
+				var faction = World.LocalPlayer?.Faction.InternalName ?? "allies";
+				var sidebarBtnBase = "sidebar-button-" + faction;
+				var buttonImage = ChromeProvider.Collections.ContainsKey(sidebarBtnBase)
+					? sidebarBtnBase
+					: (ChromeProvider.Collections.ContainsKey("sidebar-button") ? "sidebar-button" : "button");
+
+				var textColorNormal = Color.FromArgb(235, 235, 235);
+				var textColorDisabled = Color.FromArgb(120, 120, 120);
+
+				for (var i = 0; i < QueueButtonCount; i++)
+				{
+					var btnRect = GetQueueButtonRect(i);
+					var btnType = (QueueButtonType)i;
+					var isPressed = pressedQueueButton == btnType;
+
+					var disabled = false;
+					var highlighted = false;
+
+					switch (btnType)
+					{
+						case QueueButtonType.AddFive:
+							break;
+						case QueueButtonType.SubtractOne:
+							disabled = queuedItems.Count == 0;
+							break;
+						case QueueButtonType.PauseResume:
+							disabled = firstItem == null || CurrentQueue.Info.DisallowPaused;
+							highlighted = isPaused;
+							break;
+						case QueueButtonType.CancelAll:
+							disabled = queuedItems.Count == 0;
+							break;
+						case QueueButtonType.SetRallyPoint:
+							disabled = !hasRallyPoint;
+							highlighted = isRallyActive;
+							break;
+						case QueueButtonType.Close:
+							break;
+					}
+
+					ButtonWidget.DrawBackground(buttonImage, btnRect, disabled, isPressed || highlighted, false, highlighted);
+
+					var contentOffset = (isPressed || highlighted) ? new Vector2(1, 1) : Vector2.Zero;
+					var textColor = disabled ? textColorDisabled : (highlighted ? Color.FromArgb(255, 220, 90) : textColorNormal);
+
+					switch (btnType)
+					{
+						case QueueButtonType.AddFive:
+						{
+							const string text = "+5";
+							var textSize = font.Measure(text);
+							var textPos = new Vector2(
+								btnRect.X + (btnRect.Width - textSize.X) / 2f,
+								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
+							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							break;
+						}
+
+						case QueueButtonType.SubtractOne:
+						{
+							const string text = "-1";
+							var textSize = font.Measure(text);
+							var textPos = new Vector2(
+								btnRect.X + (btnRect.Width - textSize.X) / 2f,
+								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
+							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							break;
+						}
+
+						case QueueButtonType.PauseResume:
+						{
+							var text = isPaused ? ">" : "||";
+							var textSize = font.Measure(text);
+							var textPos = new Vector2(
+								btnRect.X + (btnRect.Width - textSize.X) / 2f,
+								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
+							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							break;
+						}
+
+						case QueueButtonType.CancelAll:
+						{
+							var cx = btnRect.X + btnRect.Width / 2f + contentOffset.X;
+							var cy = btnRect.Y + btnRect.Height / 2f + contentOffset.Y;
+							const float r = 7.5f;
+
+							// Shadow (1px offset)
+							DrawCircleWithSlash(cx + 1, cy + 1, r, 16, Color.FromArgb(180, Color.Black));
+
+							// Foreground
+							DrawCircleWithSlash(cx, cy, r, 16, textColor);
+							break;
+						}
+
+						case QueueButtonType.SetRallyPoint:
+						{
+							var cx = btnRect.X + btnRect.Width / 2f + contentOffset.X;
+							var cy = btnRect.Y + btnRect.Height / 2f + contentOffset.Y;
+
+							// Shadow (1px offset)
+							DrawFlagIcon(cx + 1, cy + 1, Color.FromArgb(180, Color.Black));
+
+							// Foreground
+							DrawFlagIcon(cx, cy, textColor);
+							break;
+						}
+
+						case QueueButtonType.Close:
+						{
+							const string text = "X";
+							var textSize = font.Measure(text);
+							var textPos = new Vector2(
+								btnRect.X + (btnRect.Width - textSize.X) / 2f,
+								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
+							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		static void DrawCircleWithSlash(float cx, float cy, float r, int segments, Color color)
+		{
+			var cr = Game.Renderer.RgbaColorRenderer;
+			var step = (float)(2 * Math.PI / segments);
+			for (var s = 0; s < segments; s++)
+			{
+				var a1 = s * step;
+				var a2 = (s + 1) * step;
+				var p1 = new Vector3(cx + r * (float)Math.Cos(a1), cy + r * (float)Math.Sin(a1), 0);
+				var p2 = new Vector3(cx + r * (float)Math.Cos(a2), cy + r * (float)Math.Sin(a2), 0);
+				cr.DrawLine(p1, p2, 2f, color);
+			}
+
+			var offset = r * 0.7071f;
+			var start = new Vector3(cx - offset, cy - offset, 0);
+			var end = new Vector3(cx + offset, cy + offset, 0);
+			cr.DrawLine(start, end, 2f, color);
+		}
+
+		static void DrawFlagIcon(float cx, float cy, Color color)
+		{
+			var cr = Game.Renderer.RgbaColorRenderer;
+
+			// Flag pole: vertical line
+			cr.DrawLine(new Vector3(cx - 4f, cy - 8f, 0), new Vector3(cx - 4f, cy + 8f, 0), 2f, color);
+
+			// Pole base: horizontal line
+			cr.DrawLine(new Vector3(cx - 7f, cy + 8f, 0), new Vector3(cx - 1f, cy + 8f, 0), 2f, color);
+
+			// Flag cloth: triangle
+			var pTop = new Vector3(cx - 3f, cy - 8f, 0);
+			var pTip = new Vector3(cx + 6f, cy - 4f, 0);
+			var pBottom = new Vector3(cx - 3f, cy, 0);
+			cr.FillRect(pTop, pTip, pBottom, pBottom, color);
 		}
 
 		public override string GetCursor(int2 pos)
 		{
+			if (selectedIcon != null && GetQueuePanelRect().Contains(pos))
+				return base.GetCursor(pos);
+
 			var icon = icons.Where(i => i.Key.Contains(pos))
 				.Select(i => i.Value).FirstOrDefault();
 

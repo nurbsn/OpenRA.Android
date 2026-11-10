@@ -97,7 +97,9 @@ namespace OpenRA.Mods.Common.Traits
 
 		public IEnumerable<IOrderTargeter> Orders
 		{
-			get { yield return new RallyPointOrderTargeter(Info); }
+			// Yield break so selecting a building does not hijack ground touches into SetRallyPoint
+			// Rally points are set via the dedicated flag button in the production queue panel.
+			get { yield break; }
 		}
 
 		public Order IssueOrder(Actor self, IOrderTargeter order, in Target target, bool queued)

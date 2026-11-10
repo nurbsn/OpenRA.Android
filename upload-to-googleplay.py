@@ -176,11 +176,11 @@ def upload_bundle(aab_path=None, track='internal', status='completed', update_li
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Wcześniejsze wersje były testowane na emulatorze gier Google Play i na nim te błędy nie występowały. Wersja 1.0.7 została przetestowana na urządzeniu fizycznym: naprawiono wyświetlanie mgły wojennej, wyeliminowano przycinanie animacji, ukryto paski systemowe (pełny tryb immersyjny) oraz powiększono przyciski szybkich akcji.'
+                'text': 'Wersja 1.0.9 wprowadza dotykowy panel zarządzania kolejką budowy (dodawanie +5, usuwanie -1, pauza/wznowienie, anulowanie wszystkich), dedykowany przycisk wyznaczania punktu zbiórki jednostek (Rally Point) ze wskaźnikiem celu na mapie oraz usprawnione zaznaczanie jednostek.'
             },
             {
                 'language': 'en-US',
-                'text': 'Previous versions were tested on Google Play Games emulator where these issues did not appear. Version 1.0.7 was tested on a physical device: fixed fog of war rendering, eliminated animation stuttering, hid system bars (full immersive mode), and enlarged quick action buttons.'
+                'text': 'Version 1.0.9 introduces touch-friendly build queue management (+5 queue, -1 cancel, pause/resume, cancel all), a dedicated rally point button for production structures with a visual target line, and improved unit selection ergonomics.'
             }
         ]
 
