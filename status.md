@@ -3,7 +3,7 @@ Data aktualizacji: 2026-11-10
 
 ## 1. Wydanie v1.0.9 (Release 10) – Sterowanie kolejką budowy i Rally Point
 
-Wdrożono i opublikowano wersję **v1.0.9** (versionCode: **10**):
+Wdrożono i pomyślnie opublikowano wersję **v1.0.9** (versionCode: **10**):
 
 - **Wertykalny dotykowy panel zarządzania kolejką (Queue Panel):**
   - Dotknięcie ikony jednostki/budynku w menu bocznym rozwija pionowy panel 6 przycisków umieszczony bezpośrednio po lewej stronie palety.
@@ -11,7 +11,7 @@ Wdrożono i opublikowano wersję **v1.0.9** (versionCode: **10**):
   - `[ -1 ]` – precyzyjne odwołanie pojedynczej jednostki z kolejki ze zwrotem kredytów.
   - `[ || / > ]` – wstrzymanie lub wznowienie produkcji z podświetleniem w kolorze złota gry.
   - `[ ⊘ ]` – wektorowy symbol przekreślonego koła (zakaz/anulowanie), usuwa całą kolejkę danego typu.
-  - `[ ⚑ ]` – dedykowany przycisk wyznaczania punktu zbiórki (Rally Point) dla wyprodukowanych jednostek.
+  - `[ ⚑ ]` – dedykowany przycisk wyznaczania punktu zbiórki (Rally Point) dla wyprodukowanych jednostek ze wskaźnikiem celu na mapie.
   - `[ X ]` – zamknięcie panelu podręcznego.
 - **Natywna stylistyka Red Alert:**
   - Zastosowano grafikę przycisków `sidebar-button-soviet` / `sidebar-button-allies`, idealnie zintegrowaną z oryginalnym interfejsem gry.
@@ -25,9 +25,20 @@ Wdrożono i opublikowano wersję **v1.0.9** (versionCode: **10**):
 
 ---
 
-## 2. Dystrybucja i publikacja
+## 2. Publikacja GitHub (ZAKOŃCZONE)
 
-- **Kod źródłowy:** Zacommitowany i wypchnięty do gałęzi `main` w `https://github.com/nurbsn/OpenRA.Android.git`.
-- **Tag Git:** `v1.0.9`.
-- **GitHub Release:** Oficjalne wydanie ze spakowanym instalatorem APK `OpenRA-Android-v1.0.9.apk` (92.55 MB).
-- **Google Play:** Skonfigurowane Release Notes i skrypt `upload-to-googleplay.py` dla versionCode 10.
+- **Kod źródłowy:** Zacommitowany (`6201c87`) i wypchnięty do gałęzi `main` w `https://github.com/nurbsn/OpenRA.Android.git`.
+- **Tag Git:** `v1.0.9` (wypchnięty do `myorigin`).
+- **Oficjalne wydanie:** [GitHub Release v1.0.9](https://github.com/nurbsn/OpenRA.Android/releases/tag/v1.0.9)
+- **Załączony instalator:** [`OpenRA-Android-v1.0.9.apk`](https://github.com/nurbsn/OpenRA.Android/releases/download/v1.0.9/OpenRA-Android-v1.0.9.apk) (92.55 MB, podpisany cyfrowo, gotowy do instalacji).
+
+---
+
+## 3. Publikacja Google Play Console
+
+- Zaktualizowano notatki o wydaniu (Release Notes PL/EN) w `upload-to-googleplay.py` dla `versionCode = 10` (`1.0.9`).
+- Paczka produkcyjna `.aab` wymaga podpisania kluczem `nopenra-upload.keystore`. Aby wygenerować i opublikować paczkę w Google Play:
+  ```powershell
+  .\build-android-release.ps1
+  ```
+  Podaj hasło do klucza `nopenra-upload.keystore`, a skrypt automatycznie zbuduje paczkę AAB i wyśle ją do Google Play Console.
