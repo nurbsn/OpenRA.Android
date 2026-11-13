@@ -126,7 +126,7 @@ namespace OpenRA
 
 			// Load custom user maps from configured external content directory
 			var customMapsPath = Game.GetCustomMapsPath();
-			if (!string.IsNullOrEmpty(customMapsPath))
+			if (!string.IsNullOrEmpty(customMapsPath) && (OperatingSystem.IsAndroid() || Directory.Exists(customMapsPath)))
 			{
 				try
 				{

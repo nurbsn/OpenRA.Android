@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using OpenRA.Mods.Common.Orders;
 using OpenRA.Mods.Common.Traits;
@@ -251,7 +252,7 @@ namespace OpenRA.Mods.Common.Widgets
 				groupButton.GetText = () =>
 				{
 					if (world.ControlGroups == null)
-						return groupNumber.ToString();
+						return groupNumber.ToString(CultureInfo.InvariantCulture);
 
 					var count = world.ControlGroups.GetActorsInControlGroup(groupIndex).Count();
 					return count > 0 ? $"{groupNumber}:{count}" : $"{groupNumber}";

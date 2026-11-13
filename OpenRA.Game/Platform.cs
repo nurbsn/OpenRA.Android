@@ -215,6 +215,9 @@ namespace OpenRA
 		/// </summary>
 		public static void OverrideSupportDir(string path)
 		{
+			if (!System.OperatingSystem.IsAndroid() && supportDirInitialized)
+				throw new InvalidOperationException("Attempted to override user support directory after it has already been accessed.");
+
 			if (!Directory.Exists(path))
 				throw new DirectoryNotFoundException(path);
 
@@ -249,6 +252,9 @@ namespace OpenRA
 		/// </summary>
 		public static void OverrideEngineDir(string path)
 		{
+			if (!System.OperatingSystem.IsAndroid() && engineDirAccessed)
+				throw new InvalidOperationException("Attempted to override engine directory after it has already been accessed.");
+
 			// Note: Relative paths are interpreted as being relative to BinDir, not the current working dir.
 			if (!Path.IsPathRooted(path))
 				path = Path.Combine(BinDir, path);

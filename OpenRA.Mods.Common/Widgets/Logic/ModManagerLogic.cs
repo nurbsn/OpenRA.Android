@@ -10,7 +10,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -24,6 +23,39 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 {
 	public class ModManagerLogic : ChromeLogic
 	{
+		[FluentReference]
+		const string ModActive = "button-mod-active";
+
+		[FluentReference]
+		const string ModSwitch = "button-mod-switch";
+
+		[FluentReference]
+		const string ModActiveTag = "label-mod-active-tag";
+
+		[FluentReference]
+		const string ModVersion = "label-mod-version";
+
+		[FluentReference]
+		const string StorageErrorEmpty = "label-storage-error-empty";
+
+		[FluentReference]
+		const string StorageSaved = "label-storage-saved";
+
+		[FluentReference]
+		const string DownloadErrorUrl = "label-download-error-url";
+
+		[FluentReference]
+		const string DownloadErrorProtocol = "label-download-error-protocol";
+
+		[FluentReference]
+		const string DownloadConnecting = "label-download-connecting";
+
+		[FluentReference]
+		const string DownloadInstalling = "label-download-installing";
+
+		[FluentReference]
+		const string DownloadSuccess = "label-download-success";
+
 		readonly ModData modData;
 
 		// Tab controls
@@ -133,16 +165,45 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			pathInput.Text = Game.GetCustomContentPath() ?? "";
 
 			var presetShared = widget.GetOrNull<ButtonWidget>("PRESET_SHARED");
-			if (presetShared != null)
-				presetShared.OnClick = () => pathInput.Text = "/storage/emulated/0/OpenRA";
-
 			var presetDownload = widget.GetOrNull<ButtonWidget>("PRESET_DOWNLOAD");
-			if (presetDownload != null)
-				presetDownload.OnClick = () => pathInput.Text = "/storage/emulated/0/Download/OpenRA";
-
 			var presetDocuments = widget.GetOrNull<ButtonWidget>("PRESET_DOCUMENTS");
-			if (presetDocuments != null)
-				presetDocuments.OnClick = () => pathInput.Text = "/storage/emulated/0/Documents/OpenRA";
+			if (OperatingSystem.IsAndroid())
+			{
+				if (presetShared != null)
+					presetShared.OnClick = () => pathInput.Text = "/storage/emulated/0/OpenRA";
+
+				if (presetDownload != null)
+					presetDownload.OnClick = () => pathInput.Text = "/storage/emulated/0/Download/OpenRA";
+
+				if (presetDocuments != null)
+					presetDocuments.OnClick = () => pathInput.Text = "/storage/emulated/0/Documents/OpenRA";
+			}
+			else
+			{
+				var userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+				var docsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				var sharedPath = Path.Combine(userHome, "OpenRA");
+				var downloadPath = Path.Combine(userHome, "Downloads", "OpenRA");
+				var docsPath = Path.Combine(string.IsNullOrEmpty(docsDir) ? userHome : docsDir, "OpenRA", "Content");
+
+				if (presetShared != null)
+				{
+					presetShared.GetText = () => sharedPath;
+					presetShared.OnClick = () => pathInput.Text = sharedPath;
+				}
+
+				if (presetDownload != null)
+				{
+					presetDownload.GetText = () => downloadPath;
+					presetDownload.OnClick = () => pathInput.Text = downloadPath;
+				}
+
+				if (presetDocuments != null)
+				{
+					presetDocuments.GetText = () => docsPath;
+					presetDocuments.OnClick = () => pathInput.Text = docsPath;
+				}
+			}
 
 			var presetDefault = widget.GetOrNull<ButtonWidget>("PRESET_DEFAULT");
 			if (presetDefault != null)
@@ -221,7 +282,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				if (string.IsNullOrEmpty(version) || version == "{DEV_VERSION}")
 					version = Game.EngineVersion;
 
-				var versionLabelTranslated = FluentProvider.GetMessage("label-mod-version");
+				var versionLabelTranslated = FluentProvider.GetMessage(ModVersion);
 				var versionStr = $"{modId} ({versionLabelTranslated}: {version})";
 
 				var titleLabel = item.Get<LabelWidget>("TITLE");
@@ -231,11 +292,11 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				versionLabel.GetText = () => versionStr;
 
 				var statusLabel = item.Get<LabelWidget>("STATUS");
-				statusLabel.GetText = () => isActive ? FluentProvider.GetMessage("label-mod-active-tag") : "";
+				statusLabel.GetText = () => isActive ? FluentProvider.GetMessage(ModActiveTag) : "";
 				statusLabel.IsVisible = () => isActive;
 
 				var switchButton = item.Get<ButtonWidget>("SWITCH_BUTTON");
-				switchButton.GetText = () => isActive ? FluentProvider.GetMessage("button-mod-active") : FluentProvider.GetMessage("button-mod-switch");
+				switchButton.GetText = () => isActive ? FluentProvider.GetMessage(ModActive) : FluentProvider.GetMessage(ModSwitch);
 				switchButton.IsDisabled = () => isActive;
 				if (!isActive)
 				{
@@ -254,7 +315,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				var path = pathInput.Text.Trim();
 				if (string.IsNullOrWhiteSpace(path))
 				{
-					storageStatus = FluentProvider.GetMessage("label-storage-error-empty");
+					storageStatus = FluentProvider.GetMessage(StorageErrorEmpty);
 					return;
 				}
 
@@ -264,7 +325,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 				Game.RefreshInstalledMods();
 				BuildModList();
 
-				storageStatus = FluentProvider.GetMessage("label-storage-saved");
+				storageStatus = FluentProvider.GetMessage(StorageSaved);
 			}
 			catch (Exception ex)
 			{
@@ -279,19 +340,19 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 			if (string.IsNullOrWhiteSpace(url) || !Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri))
 			{
-				downloadStatus = FluentProvider.GetMessage("label-download-error-url");
+				downloadStatus = FluentProvider.GetMessage(DownloadErrorUrl);
 				return;
 			}
 
 			if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
 			{
-				downloadStatus = FluentProvider.GetMessage("label-download-error-protocol");
+				downloadStatus = FluentProvider.GetMessage(DownloadErrorProtocol);
 				return;
 			}
 
 			isDownloading = true;
 			downloadPercentage = 0;
-			downloadStatus = FluentProvider.GetMessage("label-download-connecting");
+			downloadStatus = FluentProvider.GetMessage(DownloadConnecting);
 
 			Task.Run(async () =>
 			{
@@ -324,7 +385,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							var tempArchive = Path.Combine(customMods, filename + ".downloading");
 							downloadStatus = $"{filename}...";
 
-							using (var fs = new FileStream(tempArchive, FileMode.Create, FileAccess.Write, FileShare.None))
+							await using (var fs = new FileStream(tempArchive, FileMode.Create, FileAccess.Write, FileShare.None))
 							{
 								await response.ReadAsStreamWithProgress(fs, (total, received, percentage) =>
 								{
@@ -336,7 +397,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 								}, CancellationToken.None);
 							}
 
-							downloadStatus = FluentProvider.GetMessage("label-download-installing");
+							downloadStatus = FluentProvider.GetMessage(DownloadInstalling);
 							downloadPercentage = 100;
 
 							var isZipOrOramod = filename.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
@@ -349,13 +410,13 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 							{
 								try
 								{
-									using (var archive = System.IO.Compression.ZipFile.OpenRead(tempArchive))
+									await using (var archive = await ZipFile.OpenReadAsync(tempArchive))
 									{
 										var hasDirectModYaml = archive.Entries.Any(e => e.FullName.Equals("mod.yaml", StringComparison.OrdinalIgnoreCase));
 										var extractPath = hasDirectModYaml ? modDestination : customMods;
 
 										Directory.CreateDirectory(extractPath);
-										archive.ExtractToDirectory(extractPath, overwriteFiles: true);
+										await archive.ExtractToDirectoryAsync(extractPath, overwriteFiles: true);
 									}
 
 									File.Delete(tempArchive);
@@ -377,7 +438,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 								File.Move(tempArchive, finalFile);
 							}
 
-							downloadStatus = FluentProvider.GetMessage("label-download-success");
+							downloadStatus = FluentProvider.GetMessage(DownloadSuccess);
 							isDownloading = false;
 
 							Game.RunAfterTick(() =>

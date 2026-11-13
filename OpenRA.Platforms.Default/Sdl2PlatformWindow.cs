@@ -148,7 +148,7 @@ namespace OpenRA.Platforms.Default
 				if (OperatingSystem.IsAndroid())
 				{
 					SDL.SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
-					supportedProfiles = new[] { GLProfile.Embedded };
+					supportedProfiles = [GLProfile.Embedded];
 					profile = GLProfile.Embedded;
 				}
 				else

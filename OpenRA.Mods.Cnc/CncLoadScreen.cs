@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System;
 using System.Numerics;
 using OpenRA.FileSystem;
 using OpenRA.Graphics;
@@ -45,7 +46,7 @@ namespace OpenRA.Mods.Cnc
 			if (string.IsNullOrEmpty(modVersion) || modVersion == "{DEV_VERSION}")
 				modVersion = Game.EngineVersion ?? "bleed-20261017";
 
-			versionText = $"{modVersion} (Android v{Game.AndroidVersion})";
+			versionText = OperatingSystem.IsAndroid() ? $"{modVersion} (Android v{Game.AndroidVersion})" : modVersion;
 
 			message = FluentProvider.GetMessage(Loading);
 		}

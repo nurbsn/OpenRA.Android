@@ -137,10 +137,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 
 		Action ResetPanel(Widget panel)
 		{
-			return () =>
-			{
-				SetLanguage("en");
-			};
+			return () => SetLanguage("en");
 		}
 	}
 }

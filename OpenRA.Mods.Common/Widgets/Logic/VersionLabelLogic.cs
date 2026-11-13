@@ -9,6 +9,7 @@
  */
 #endregion
 
+using System;
 using OpenRA.Widgets;
 
 namespace OpenRA.Mods.Common.Widgets.Logic
@@ -22,7 +23,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			if (string.IsNullOrEmpty(modVersion) || modVersion == "{DEV_VERSION}")
 				modVersion = Game.EngineVersion;
 
-			var appVersion = $"{modVersion} (Android v{Game.AndroidVersion})";
+			var appVersion = OperatingSystem.IsAndroid() ? $"{modVersion} (Android v{Game.AndroidVersion})" : modVersion;
 			widget.GetText = () => appVersion;
 		}
 	}

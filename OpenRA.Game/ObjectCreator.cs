@@ -45,25 +45,28 @@ namespace OpenRA
 
 		static void LoadAssembly(List<Assembly> assemblyList, string resolvedPath)
 		{
-			var asmName = Path.GetFileNameWithoutExtension(resolvedPath);
-			var existing = AppDomain.CurrentDomain.GetAssemblies()
-				.FirstOrDefault(a => a.GetName().Name.Equals(asmName, StringComparison.OrdinalIgnoreCase));
-			if (existing != null)
+			if (OperatingSystem.IsAndroid())
 			{
-				assemblyList.Add(existing);
-				return;
-			}
-
-			try
-			{
-				var loaded = Assembly.Load(new AssemblyName(asmName));
-				if (loaded != null)
+				var asmName = Path.GetFileNameWithoutExtension(resolvedPath);
+				var existing = AppDomain.CurrentDomain.GetAssemblies()
+					.FirstOrDefault(a => a.GetName().Name.Equals(asmName, StringComparison.OrdinalIgnoreCase));
+				if (existing != null)
 				{
-					assemblyList.Add(loaded);
+					assemblyList.Add(existing);
 					return;
 				}
+
+				try
+				{
+					var loaded = Assembly.Load(new AssemblyName(asmName));
+					if (loaded != null)
+					{
+						assemblyList.Add(loaded);
+						return;
+					}
+				}
+				catch { }
 			}
-			catch { }
 
 			if (!File.Exists(resolvedPath) && File.Exists(Path.Combine(Platform.EngineDir, Path.GetFileName(resolvedPath))))
 				resolvedPath = Path.Combine(Platform.EngineDir, Path.GetFileName(resolvedPath));

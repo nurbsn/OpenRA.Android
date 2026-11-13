@@ -146,19 +146,19 @@ Background@MOD_MANAGER_PANEL:
 							Y: 235
 							Width: 270
 							Height: 35
-							Text: Combined Arms
+							Text: button-preset-ca
 						Button@PRESET_RV:
 							X: 285
 							Y: 235
 							Width: 270
 							Height: 35
-							Text: Romanov's Vengeance
+							Text: button-preset-rv
 						Button@PRESET_SP:
 							X: 570
 							Y: 235
 							Width: 270
 							Height: 35
-							Text: Shattered Paradise
+							Text: button-preset-sp
 				Container@PANEL_STORAGE:
 					Width: PARENT_WIDTH
 					Height: PARENT_HEIGHT

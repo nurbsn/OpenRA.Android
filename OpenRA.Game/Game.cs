@@ -35,6 +35,7 @@ namespace OpenRA
 		const string SavedScreenshot = "notification-saved-screenshot";
 
 		public const int TimestepJankThreshold = 250; // Don't catch up for delays larger than 250ms
+		public const string AndroidVersion = "1.0.10";
 
 		public static InstalledMods Mods { get; private set; }
 		public static ExternalMods ExternalMods { get; private set; }
@@ -58,8 +59,7 @@ namespace OpenRA
 		public static Sound Sound;
 
 		public static string EngineVersion { get; private set; }
-		public const string AndroidVersion = "1.0.10";
-		public static string AppVersion => $"{EngineVersion} (Android v{AndroidVersion})";
+		public static string AppVersion => OperatingSystem.IsAndroid() ? $"{EngineVersion} (Android v{AndroidVersion})" : EngineVersion;
 		public static LocalPlayerProfile LocalPlayerProfile;
 
 		static bool takeScreenshot = false;
@@ -414,7 +414,7 @@ namespace OpenRA
 
 			var combinedSearchPaths = new List<string>(modSearchPaths);
 			var customMods = GetCustomModsPath();
-			if (!string.IsNullOrEmpty(customMods) && !combinedSearchPaths.Contains(customMods))
+			if (!string.IsNullOrEmpty(customMods) && Directory.Exists(customMods) && !combinedSearchPaths.Contains(customMods))
 				combinedSearchPaths.Add(customMods);
 
 			Mods = new InstalledMods(combinedSearchPaths, explicitModPaths);
@@ -484,23 +484,26 @@ namespace OpenRA
 
 		public static IPlatform CreatePlatform(string platformName)
 		{
-			var asmName = "OpenRA.Platforms." + platformName;
-			var existing = AppDomain.CurrentDomain.GetAssemblies()
-				.FirstOrDefault(a => a.GetName().Name == asmName);
-			if (existing == null)
+			if (OperatingSystem.IsAndroid())
 			{
-				try
+				var asmName = "OpenRA.Platforms." + platformName;
+				var existing = AppDomain.CurrentDomain.GetAssemblies()
+					.FirstOrDefault(a => a.GetName().Name == asmName);
+				if (existing == null)
 				{
-					existing = System.Reflection.Assembly.Load(new System.Reflection.AssemblyName(asmName));
+					try
+					{
+						existing = System.Reflection.Assembly.Load(new System.Reflection.AssemblyName(asmName));
+					}
+					catch { }
 				}
-				catch { }
-			}
 
-			if (existing != null)
-			{
-				var pType = existing.GetTypes().SingleOrDefault(t => typeof(IPlatform).IsAssignableFrom(t));
-				if (pType != null)
-					return (IPlatform)pType.GetConstructor(Type.EmptyTypes).Invoke(null);
+				if (existing != null)
+				{
+					var pType = existing.GetTypes().SingleOrDefault(t => typeof(IPlatform).IsAssignableFrom(t));
+					if (pType != null)
+						return (IPlatform)pType.GetConstructor(Type.EmptyTypes).Invoke(null);
+				}
 			}
 
 			var rendererPath = Path.Combine(Platform.BinDir, "OpenRA.Platforms." + platformName + ".dll");
@@ -604,6 +607,9 @@ namespace OpenRA
 
 		public static void EnsureCustomContentPaths()
 		{
+			if (!OperatingSystem.IsAndroid() && string.IsNullOrWhiteSpace(Settings?.Game?.CustomContentPath))
+				return;
+
 			try
 			{
 				var modsPath = GetCustomModsPath();
@@ -635,10 +641,10 @@ namespace OpenRA
 			EnsureCustomContentPaths();
 			var searchPaths = new List<string>(initialModSearchPaths ?? [Path.Combine(Platform.EngineDir, "mods")]);
 			var customMods = GetCustomModsPath();
-			if (!string.IsNullOrEmpty(customMods) && !searchPaths.Contains(customMods))
+			if (!string.IsNullOrEmpty(customMods) && Directory.Exists(customMods) && !searchPaths.Contains(customMods))
 				searchPaths.Add(customMods);
 
-			Mods = new InstalledMods(searchPaths, initialExplicitModPaths ?? Array.Empty<string>());
+			Mods = new InstalledMods(searchPaths, initialExplicitModPaths ?? []);
 			Console.WriteLine("Refreshed installed mods:");
 			foreach (var mod in Mods)
 				Console.WriteLine($"\t{mod.Key} ({mod.Value.Metadata.Version})");
@@ -704,13 +710,10 @@ namespace OpenRA
 
 		public static void SwitchToExternalMod(ExternalMod mod, string[] launchArguments = null, Action onFailed = null)
 		{
-			if (OperatingSystem.IsAndroid())
+			if (OperatingSystem.IsAndroid() && Mods != null && Mods.TryGetValue(mod.Id, out var modManifest))
 			{
-				if (Mods != null && Mods.TryGetValue(mod.Id, out var modManifest))
-				{
-					RunAfterTick(() => InitializeMod(modManifest, new Arguments(launchArguments ?? Array.Empty<string>())));
-					return;
-				}
+				RunAfterTick(() => InitializeMod(modManifest, new Arguments(launchArguments ?? [])));
+				return;
 			}
 
 			try
@@ -1067,7 +1070,7 @@ namespace OpenRA
 				ModData = null;
 				SafeCleanup(ChromeProvider.Deinitialize);
 
-				SafeCleanup(() => TouchInputAdapter.Instance.Reset());
+				SafeCleanup(TouchInputAdapter.Instance.Reset);
 				SafeCleanup(CloseServer);
 
 				SafeCleanup(() => Sound?.Dispose());

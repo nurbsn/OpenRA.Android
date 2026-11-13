@@ -42,6 +42,11 @@ button-command-bar-deploy =
 
     Acts immediately on selected units.
 
+button-command-bar-select-all = ALL
+button-command-bar-select-all-tooltip = Select all units on screen
+button-command-bar-deselect = X
+button-command-bar-deselect-tooltip = Deselect all units
+
 
 button-top-buttons-beacon-tooltip = Place Beacon
 button-top-buttons-sell-tooltip = Sell

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using OpenRA.Primitives;
 using OpenRA.Widgets;
 
 namespace OpenRA
@@ -53,7 +52,8 @@ namespace OpenRA
 			if (w == null || !w.IsVisible())
 				return false;
 
-			if (w.Id is "INTERACTION_CONTROLLER" or "WORLD_KEYHANDLER" or "GLOBAL_KEYHANDLER" or "PERF_ROOT" or "TOOLTIP_CONTAINER" or "MOUSE_ATTATCHMENT" or "CHAT_OVERLAY")
+			if (w.Id is "INTERACTION_CONTROLLER" or "WORLD_KEYHANDLER" or "GLOBAL_KEYHANDLER" or "PERF_ROOT"
+				or "TOOLTIP_CONTAINER" or "MOUSE_ATTATCHMENT" or "CHAT_OVERLAY")
 				return false;
 
 			var typeName = w.GetType().Name;
@@ -113,15 +113,13 @@ namespace OpenRA
 			}
 		}
 
-		public int2 HoldPosition => firstFingerStartPos;
-		public int2 HoldCurrentPosition => firstFingerCurrentPos;
+		public int2 HoldPosition { get; private set; }
+		public int2 HoldCurrentPosition { get; private set; }
 
 		readonly ConcurrentQueue<MouseInput> queue = new();
 		readonly Stopwatch stopwatch = Stopwatch.StartNew();
 
 		long? firstFingerId;
-		int2 firstFingerStartPos;
-		int2 firstFingerCurrentPos;
 		int2 previousSinglePanPos;
 		long firstFingerDownTime;
 		GestureMode gestureMode = GestureMode.None;
@@ -137,13 +135,13 @@ namespace OpenRA
 			if (gestureMode == GestureMode.Undecided && firstFingerId != null && secondFingerId == null)
 			{
 				var elapsed = stopwatch.ElapsedMilliseconds - firstFingerDownTime;
-				var moveDistance = (firstFingerCurrentPos - firstFingerStartPos).Length;
+				var moveDistance = (HoldCurrentPosition - HoldPosition).Length;
 
 				if (elapsed >= LongPressThresholdMs && moveDistance <= SwipeMoveThreshold)
 				{
 					gestureMode = GestureMode.BoxSelecting;
-					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
-					queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
+					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, HoldPosition, int2.Zero, Modifiers.None, 0));
+					queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, HoldPosition, int2.Zero, Modifiers.None, 0));
 				}
 			}
 
@@ -154,7 +152,7 @@ namespace OpenRA
 		void EnqueueActiveGestureUp()
 		{
 			if (gestureMode == GestureMode.BoxSelecting || gestureMode == GestureMode.DirectUIInteraction)
-				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
+				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Left, HoldCurrentPosition, int2.Zero, Modifiers.None, 0));
 			else if (gestureMode == GestureMode.SingleFingerPanning)
 				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Middle, previousSinglePanPos, int2.Zero, Modifiers.None, 0));
 			else if (gestureMode == GestureMode.TwoFingerGesture)
@@ -188,8 +186,8 @@ namespace OpenRA
 			if (firstFingerId == null || firstFingerId == fingerId)
 			{
 				firstFingerId = fingerId;
-				firstFingerStartPos = pos;
-				firstFingerCurrentPos = pos;
+				HoldPosition = pos;
+				HoldCurrentPosition = pos;
 				previousSinglePanPos = pos;
 				firstFingerDownTime = stopwatch.ElapsedMilliseconds;
 
@@ -219,8 +217,8 @@ namespace OpenRA
 				EnqueueActiveGestureUp();
 
 				gestureMode = GestureMode.TwoFingerGesture;
-				previousPanCenter = (firstFingerCurrentPos + secondFingerPos) / 2;
-				previousPinchDistance = (firstFingerCurrentPos - secondFingerPos).Length;
+				previousPanCenter = (HoldCurrentPosition + secondFingerPos) / 2;
+				previousPinchDistance = (HoldCurrentPosition - secondFingerPos).Length;
 
 				queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, previousPanCenter, int2.Zero, Modifiers.None, 0));
 				queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Middle, previousPanCenter, int2.Zero, Modifiers.None, 0));
@@ -230,14 +228,14 @@ namespace OpenRA
 		public void OnFingerMotion(long fingerId, int2 pos)
 		{
 			if (firstFingerId == fingerId)
-				firstFingerCurrentPos = pos;
+				HoldCurrentPosition = pos;
 			else if (secondFingerId == fingerId)
 				secondFingerPos = pos;
 
 			// Two-finger gestures (Pan & Pinch-to-zoom)
 			if (gestureMode == GestureMode.TwoFingerGesture && firstFingerId != null && secondFingerId != null)
 			{
-				var currentPanCenter = (firstFingerCurrentPos + secondFingerPos) / 2;
+				var currentPanCenter = (HoldCurrentPosition + secondFingerPos) / 2;
 				var panDelta = currentPanCenter - previousPanCenter;
 
 				if (panDelta != int2.Zero)
@@ -245,7 +243,7 @@ namespace OpenRA
 
 				previousPanCenter = currentPanCenter;
 
-				var currentPinchDistance = (firstFingerCurrentPos - secondFingerPos).Length;
+				var currentPinchDistance = (HoldCurrentPosition - secondFingerPos).Length;
 				var pinchDelta = currentPinchDistance - previousPinchDistance;
 
 				if (Math.Abs(pinchDelta) > 15)
@@ -260,7 +258,7 @@ namespace OpenRA
 
 			if (gestureMode == GestureMode.DirectUIInteraction && firstFingerId != null)
 			{
-				queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
+				queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, HoldCurrentPosition, int2.Zero, Modifiers.None, 0));
 				return;
 			}
 
@@ -268,7 +266,7 @@ namespace OpenRA
 			if (firstFingerId != null && secondFingerId == null)
 			{
 				var elapsed = stopwatch.ElapsedMilliseconds - firstFingerDownTime;
-				var moveDistance = (firstFingerCurrentPos - firstFingerStartPos).Length;
+				var moveDistance = (HoldCurrentPosition - HoldPosition).Length;
 
 				if (gestureMode == GestureMode.Undecided)
 				{
@@ -276,33 +274,33 @@ namespace OpenRA
 					{
 						// Held >= threshold: Enter box selection
 						gestureMode = GestureMode.BoxSelecting;
-						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
-						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
-						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, HoldPosition, int2.Zero, Modifiers.None, 0));
+						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Left, HoldPosition, int2.Zero, Modifiers.None, 0));
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, HoldCurrentPosition, int2.Zero, Modifiers.None, 0));
 					}
 					else if (moveDistance > SwipeMoveThreshold)
 					{
 						// Moved before threshold: Enter swipe-to-pan screen
 						gestureMode = GestureMode.SingleFingerPanning;
-						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
-						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Middle, firstFingerStartPos, int2.Zero, Modifiers.None, 0));
-						var initialDelta = firstFingerCurrentPos - firstFingerStartPos;
-						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Middle, firstFingerCurrentPos, initialDelta, Modifiers.None, 0));
-						previousSinglePanPos = firstFingerCurrentPos;
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, HoldPosition, int2.Zero, Modifiers.None, 0));
+						queue.Enqueue(new MouseInput(MouseInputEvent.Down, MouseButton.Middle, HoldPosition, int2.Zero, Modifiers.None, 0));
+						var initialDelta = HoldCurrentPosition - HoldPosition;
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Middle, HoldCurrentPosition, initialDelta, Modifiers.None, 0));
+						previousSinglePanPos = HoldCurrentPosition;
 					}
 				}
 				else if (gestureMode == GestureMode.SingleFingerPanning)
 				{
-					var panDelta = firstFingerCurrentPos - previousSinglePanPos;
+					var panDelta = HoldCurrentPosition - previousSinglePanPos;
 					if (panDelta != int2.Zero)
 					{
-						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Middle, firstFingerCurrentPos, panDelta, Modifiers.None, 0));
-						previousSinglePanPos = firstFingerCurrentPos;
+						queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Middle, HoldCurrentPosition, panDelta, Modifiers.None, 0));
+						previousSinglePanPos = HoldCurrentPosition;
 					}
 				}
 				else if (gestureMode == GestureMode.BoxSelecting)
 				{
-					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
+					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.Left, HoldCurrentPosition, int2.Zero, Modifiers.None, 0));
 				}
 			}
 		}

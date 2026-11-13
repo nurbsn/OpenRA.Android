@@ -166,7 +166,7 @@ namespace OpenRA.Mods.Common.Widgets.Logic
 			var touchInputRow = panel.GetOrNull("TOUCH_INPUT_ROW");
 			if (touchInputRow != null)
 			{
-				touchInputRow.IsVisible = () => OperatingSystem.IsAndroid();
+				touchInputRow.IsVisible = OperatingSystem.IsAndroid;
 				if (OperatingSystem.IsAndroid())
 				{
 					SettingsUtils.BindIntSliderPref(panel, "HOLD_DELAY_SLIDER", gameSettings, "TouchHoldDuration");

@@ -95,7 +95,7 @@ namespace OpenRA.Mods.Common.Widgets
 				var scale = graphicSettings.CursorDouble ? 2 : 1;
 				var pos = Viewport.LastMousePos + scale * CursorOffset;
 
-				if (widgetArgs != null && widgetArgs.TryGetValue("productionPalette", out var pObj) && pObj is Widget palWidget)
+				if (OperatingSystem.IsAndroid() && widgetArgs != null && widgetArgs.TryGetValue("productionPalette", out var pObj) && pObj is Widget palWidget)
 				{
 					var bounds = palWidget.Parent != null ? palWidget.Parent.RenderBounds : palWidget.RenderBounds;
 					pos = new int2(palWidget.RenderBounds.Left, bounds.Bottom + 4);
@@ -110,7 +110,7 @@ namespace OpenRA.Mods.Common.Widgets
 					// If the tooltip overlaps the bottom edge of the screen, switch tooltip above cursor or clamp
 					if (pos.Y + tooltip.Bounds.Bottom > Game.Renderer.Resolution.Height)
 					{
-						if (widgetArgs != null && widgetArgs.ContainsKey("productionPalette"))
+						if (OperatingSystem.IsAndroid() && widgetArgs != null && widgetArgs.ContainsKey("productionPalette"))
 							pos = pos.WithY(Game.Renderer.Resolution.Height - tooltip.Bounds.Bottom - 4);
 						else
 							pos = pos.WithY(Viewport.LastMousePos.Y + scale * BottomEdgeYOffset - tooltip.Bounds.Height);

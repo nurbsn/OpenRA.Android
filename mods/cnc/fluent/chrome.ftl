@@ -246,6 +246,11 @@ button-command-bar-attack-move =
 
     Left-click icon then right-click on target location.
 
+button-command-bar-select-all = ALL
+button-command-bar-select-all-tooltip = Select all units on screen
+button-command-bar-deselect = X
+button-command-bar-deselect-tooltip = Deselect all units
+
 button-command-bar-force-move =
     .tooltip = Force Move
     .tooltipdesc =
@@ -500,7 +505,7 @@ checkbox-edgescroll-container = Screen Edge Panning
 ## mainmenu.yaml
 label-singleplayer-title = Singleplayer
 label-main-menu-title = Main Menu
-button-mods-title = Mody / Mods
+button-mods-title = Mods
 button-extras-title = Extras
 button-main-menu-content = Manage Content
 button-singleplayer-menu-skirmish = Skirmish
@@ -799,7 +804,40 @@ button-panel-hotkeys = Hotkeys
 button-panel-advanced = Advanced
 button-panel-language = Language
 button-close = Close
-button-mods-title = Mods
+
+## mod-manager.yaml
+label-mod-manager-title = Mod & Content Manager
+button-tab-installed-mods = Installed Mods
+button-tab-download-mods = Download Mods
+button-tab-storage-folder = Storage & Maps Folder
+button-refresh-list = Refresh List
+label-download-desc = Enter direct URL of mod archive (.zip or .oramod):
+button-paste-link = Paste Link
+button-download-install = Download & Install
+label-ready-download = Ready to download
+label-popular-mods = Popular OpenRA Mods (click to fill link):
+button-preset-ca = Combined Arms
+button-preset-rv = Romanov's Vengeance
+button-preset-sp = Shattered Paradise
+label-storage-desc-1 = Content root directory for mods (/mods) and maps (/maps):
+label-storage-desc-2 = On modern Android /Android/data/ is locked. Choose a folder in shared storage:
+label-storage-presets = Quick locations (click to select):
+button-storage-shared = Internal Storage (/storage/emulated/0/OpenRA)
+button-storage-download = Downloads Folder (/storage/emulated/0/Download/OpenRA)
+button-storage-documents = Documents Folder (/storage/emulated/0/Documents/OpenRA)
+button-storage-default = App Default Directory
+button-save-create-folders = Save & Create Folders
+button-mod-active = Active
+button-mod-switch = Switch
+label-mod-active-tag = [ACTIVE]
+label-mod-version = version
+label-storage-error-empty = Error: path cannot be empty.
+label-storage-saved = Saved! Created /mods and /maps folders.
+label-download-error-url = Error: Invalid URL.
+label-download-error-protocol = Error: Only HTTP and HTTPS protocols are supported.
+label-download-connecting = Connecting to server...
+label-download-installing = Installing and extracting...
+label-download-success = Mod installed successfully!
 
 ## settings-language.yaml
 label-language-section-header = LANGUAGE & TRANSLATIONS

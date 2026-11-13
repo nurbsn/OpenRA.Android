@@ -25,8 +25,6 @@ namespace OpenRA.Mods.Common.Widgets
 	public class WorldInteractionControllerWidget : Widget
 	{
 		protected readonly World World;
-		readonly WorldRenderer worldRenderer;
-		public WorldRenderer WorldRenderer => worldRenderer;
 		readonly Color normalSelectionColor;
 		readonly Color altSelectionColor;
 		readonly Color ctrlSelectionColor;
@@ -38,6 +36,7 @@ namespace OpenRA.Mods.Common.Widgets
 		int2 dragStart, mousePos;
 		bool isDragging = false;
 
+		public WorldRenderer WorldRenderer { get; }
 		bool IsValidDragbox => isDragging && (dragStart - mousePos).Length > Game.Settings.Game.SelectionDeadzone;
 
 		public override bool YieldMouseFocus(MouseInput mi)
@@ -59,7 +58,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			World = world;
 			gameSettings = Game.Settings.Game;
-			this.worldRenderer = worldRenderer;
+			WorldRenderer = worldRenderer;
 			if (!ChromeMetrics.TryGet("AltSelectionColor", out altSelectionColor))
 				altSelectionColor = Color.White;
 
@@ -76,8 +75,8 @@ namespace OpenRA.Mods.Common.Widgets
 			IEnumerable<Actor> rollover;
 			if (IsValidDragbox)
 			{
-				var a = worldRenderer.Viewport.WorldToViewPx(dragStart).ToVector3();
-				var b = worldRenderer.Viewport.WorldToViewPx(mousePos).ToVector3();
+				var a = WorldRenderer.Viewport.WorldToViewPx(dragStart).ToVector3();
+				var b = WorldRenderer.Viewport.WorldToViewPx(mousePos).ToVector3();
 
 				var color = normalSelectionColor;
 				if (modifiers.HasFlag(Modifiers.Alt) && !modifiers.HasFlag(Modifiers.Ctrl))
@@ -96,7 +95,7 @@ namespace OpenRA.Mods.Common.Widgets
 				rollover = SelectionUtils.SelectActorsInBoxWithDeadzone(World, mousePos, mousePos, modifiers);
 			}
 
-			worldRenderer.World.Selection.SetRollover(rollover);
+			WorldRenderer.World.Selection.SetRollover(rollover);
 
 			DrawTouchHoldIndicator();
 		}
@@ -116,36 +115,36 @@ namespace OpenRA.Mods.Common.Widgets
 				return;
 
 			var center = new Vector2(pos.X, pos.Y);
-			const float radius = 34f;
-			const int circleSegments = 36;
+			const float Radius = 34f;
+			const int CircleSegments = 36;
 
 			// Background faint ring
-			Span<Vector2> bgVertices = stackalloc Vector2[circleSegments];
-			for (var i = 0; i < circleSegments; i++)
+			Span<Vector2> bgVertices = stackalloc Vector2[CircleSegments];
+			for (var i = 0; i < CircleSegments; i++)
 			{
-				var angle = i * MathF.Tau / circleSegments;
-				bgVertices[i] = center + new Vector2(MathF.Cos(angle) * radius, MathF.Sin(angle) * radius);
+				var angle = i * MathF.Tau / CircleSegments;
+				bgVertices[i] = center + new Vector2(MathF.Cos(angle) * Radius, MathF.Sin(angle) * Radius);
 			}
 
 			var bgRingColor = Color.FromArgb(70, 255, 255, 255);
 			Game.Renderer.RgbaColorRenderer.DrawPolygon(bgVertices, 1.5f, bgRingColor);
 
 			// Progress arc sweeping clockwise from top (-PI/2)
-			var arcSegments = Math.Max(1, (int)MathF.Ceiling(circleSegments * progress));
+			var arcSegments = Math.Max(1, (int)MathF.Ceiling(CircleSegments * progress));
 			var arcColor = Color.FromArgb(235, 255, 255, 255);
 
 			for (var i = 0; i < arcSegments; i++)
 			{
-				var t1 = (float)i / circleSegments;
-				var t2 = Math.Min(progress, (float)(i + 1) / circleSegments);
+				var t1 = (float)i / CircleSegments;
+				var t2 = Math.Min(progress, (float)(i + 1) / CircleSegments);
 				if (t1 >= progress)
 					break;
 
 				var a1 = -MathF.PI / 2f + t1 * MathF.Tau;
 				var a2 = -MathF.PI / 2f + t2 * MathF.Tau;
 
-				var p1 = center + new Vector2(MathF.Cos(a1) * radius, MathF.Sin(a1) * radius);
-				var p2 = center + new Vector2(MathF.Cos(a2) * radius, MathF.Sin(a2) * radius);
+				var p1 = center + new Vector2(MathF.Cos(a1) * Radius, MathF.Sin(a1) * Radius);
+				var p2 = center + new Vector2(MathF.Cos(a2) * Radius, MathF.Sin(a2) * Radius);
 
 				Game.Renderer.RgbaColorRenderer.DrawLine(p1, p2, 3.5f, arcColor);
 			}
@@ -168,7 +167,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (mi.Button == MouseButton.Middle)
 				return false;
 
-			mousePos = worldRenderer.Viewport.ViewToWorldPx(mi.Location);
+			mousePos = WorldRenderer.Viewport.ViewToWorldPx(mi.Location);
 
 			var useClassicMouseStyle = gameSettings.MouseControlStyle == MouseControlStyle.Classic || OperatingSystem.IsAndroid();
 			var actionButton = World.OrderGenerator.ActionButton;
@@ -221,7 +220,7 @@ namespace OpenRA.Mods.Common.Widgets
 						if (s != null)
 						{
 							// Select actors on the screen that have the same selection class as the actor under the mouse cursor
-							var newSelection = SelectionUtils.SelectActorsOnScreen(World, worldRenderer, [s.Class], eligiblePlayers);
+							var newSelection = SelectionUtils.SelectActorsOnScreen(World, WorldRenderer, [s.Class], eligiblePlayers);
 
 							World.Selection.Combine(World, newSelection, true, false);
 						}
@@ -271,8 +270,8 @@ namespace OpenRA.Mods.Common.Widgets
 			if (world.OrderGenerator == null)
 				return;
 
-			var cell = worldRenderer.Viewport.ViewToWorld(mi.Location);
-			var worldPixel = worldRenderer.Viewport.ViewToWorldPx(mi.Location);
+			var cell = WorldRenderer.Viewport.ViewToWorld(mi.Location);
+			var worldPixel = WorldRenderer.Viewport.ViewToWorldPx(mi.Location);
 			var orders = world.OrderGenerator.Order(world, cell, worldPixel, mi).ToArray();
 			orders.PlayVoiceForOrders();
 
@@ -302,8 +301,8 @@ namespace OpenRA.Mods.Common.Widgets
 				if (IsValidDragbox)
 					return null;
 
-				var cell = worldRenderer.Viewport.ViewToWorld(screenPos);
-				var worldPixel = worldRenderer.Viewport.ViewToWorldPx(screenPos);
+				var cell = WorldRenderer.Viewport.ViewToWorld(screenPos);
+				var worldPixel = WorldRenderer.Viewport.ViewToWorldPx(screenPos);
 
 				var mi = new MouseInput
 				{

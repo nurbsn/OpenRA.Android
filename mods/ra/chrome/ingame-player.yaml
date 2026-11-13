@@ -195,9 +195,9 @@ Container@PLAYER_WIDGETS:
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
-					Text: ALL
+					Text: button-command-bar-select-all
 					Font: TinyBold
-					TooltipText: Select all units on screen
+					TooltipText: button-command-bar-select-all-tooltip
 					TooltipContainer: TOOLTIP_CONTAINER
 					TooltipTemplate: SIMPLE_TOOLTIP
 				Button@DESELECT:
@@ -209,10 +209,10 @@ Container@PLAYER_WIDGETS:
 					VisualHeight: 0
 					Background: command-button
 					DisableKeySound: true
-					Text: X
+					Text: button-command-bar-deselect
 					Font: Bold
 					TextColor: FFFF00
-					TooltipText: Deselect all units
+					TooltipText: button-command-bar-deselect-tooltip
 					TooltipContainer: TOOLTIP_CONTAINER
 					TooltipTemplate: SIMPLE_TOOLTIP
 				Button@GROUP_1:

@@ -11,5 +11,4 @@
   <Project Path="OpenRA.WindowsLauncher/OpenRA.WindowsLauncher.csproj">
     <Build Project="false" />
   </Project>
-  <Project Path="OpenRA.Android/OpenRA.Android.csproj" />
 </Solution>

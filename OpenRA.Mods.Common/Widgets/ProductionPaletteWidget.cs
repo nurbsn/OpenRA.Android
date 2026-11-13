@@ -1014,23 +1014,23 @@ namespace OpenRA.Mods.Common.Widgets
 					{
 						case QueueButtonType.AddFive:
 						{
-							const string text = "+5";
-							var textSize = font.Measure(text);
+							const string Text = "+5";
+							var textSize = font.Measure(Text);
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
+							font.DrawTextWithShadow(Text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 
 						case QueueButtonType.SubtractOne:
 						{
-							const string text = "-1";
-							var textSize = font.Measure(text);
+							const string Text = "-1";
+							var textSize = font.Measure(Text);
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
+							font.DrawTextWithShadow(Text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 
@@ -1049,13 +1049,13 @@ namespace OpenRA.Mods.Common.Widgets
 						{
 							var cx = btnRect.X + btnRect.Width / 2f + contentOffset.X;
 							var cy = btnRect.Y + btnRect.Height / 2f + contentOffset.Y;
-							const float r = 7.5f;
+							const float Radius = 7.5f;
 
 							// Shadow (1px offset)
-							DrawCircleWithSlash(cx + 1, cy + 1, r, 16, iconShadowColor);
+							DrawCircleWithSlash(cx + 1, cy + 1, Radius, 16, iconShadowColor);
 
 							// Foreground
-							DrawCircleWithSlash(cx, cy, r, 16, textColor);
+							DrawCircleWithSlash(cx, cy, Radius, 16, textColor);
 							break;
 						}
 
@@ -1074,12 +1074,12 @@ namespace OpenRA.Mods.Common.Widgets
 
 						case QueueButtonType.Close:
 						{
-							const string text = "X";
-							var textSize = font.Measure(text);
+							const string Text = "X";
+							var textSize = font.Measure(Text);
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
+							font.DrawTextWithShadow(Text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 					}

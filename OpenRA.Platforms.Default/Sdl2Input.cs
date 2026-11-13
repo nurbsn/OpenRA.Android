@@ -279,8 +279,12 @@ namespace OpenRA.Platforms.Default
 
 						break;
 					}
+
 					case SDL.SDL_EventType.SDL_FINGERDOWN:
 					{
+						if (!OperatingSystem.IsAndroid())
+							break;
+
 						var x = (int)(e.tfinger.x * device.SurfaceSize.Width);
 						var y = (int)(e.tfinger.y * device.SurfaceSize.Height);
 						var pos = EventPosition(device, x, y);
@@ -290,6 +294,9 @@ namespace OpenRA.Platforms.Default
 
 					case SDL.SDL_EventType.SDL_FINGERMOTION:
 					{
+						if (!OperatingSystem.IsAndroid())
+							break;
+
 						var x = (int)(e.tfinger.x * device.SurfaceSize.Width);
 						var y = (int)(e.tfinger.y * device.SurfaceSize.Height);
 						var pos = EventPosition(device, x, y);
@@ -299,6 +306,9 @@ namespace OpenRA.Platforms.Default
 
 					case SDL.SDL_EventType.SDL_FINGERUP:
 					{
+						if (!OperatingSystem.IsAndroid())
+							break;
+
 						var x = (int)(e.tfinger.x * device.SurfaceSize.Width);
 						var y = (int)(e.tfinger.y * device.SurfaceSize.Height);
 						var pos = EventPosition(device, x, y);
@@ -308,7 +318,8 @@ namespace OpenRA.Platforms.Default
 				}
 			}
 
-			touchAdapter.PumpInputs(inputHandler);
+			if (OperatingSystem.IsAndroid())
+				touchAdapter.PumpInputs(inputHandler);
 
 			if (pendingMotion != null)
 				inputHandler.OnMouseInput(pendingMotion.Value);

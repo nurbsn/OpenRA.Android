@@ -13,8 +13,8 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -251,7 +251,7 @@ namespace OpenRA
 
 		public bool CursorDouble = false;
 		public WorldViewport ViewportDistance = WorldViewport.Medium;
-		public float UIScale = 1.5f;
+		public float UIScale = OperatingSystem.IsAndroid() ? 1.5f : 1f;
 
 		[Desc("Add a frame rate limiter.")]
 		public bool CapFramerate = false;

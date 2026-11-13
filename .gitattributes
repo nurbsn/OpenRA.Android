@@ -4,7 +4,12 @@
 *.cs eol=lf
 *.csproj eol=lf
 *.sln eol=lf
+*.slnx eol=lf
+*.sh eol=lf
+*.in eol=lf
+Makefile eol=lf
 * text=lf
+*.zip binary
 
 # Custom for Visual Studio
 *.cs     diff=csharp
