@@ -33,11 +33,13 @@ namespace OpenRA.Mods.Common.Orders
 		public MouseButton ActionButton => Game.Settings.Game.ResolveActionButton(MouseActionType.GlobalCommand);
 		public MouseButton CancelButton => Game.Settings.Game.ResolveCancelButton(MouseActionType.GlobalCommand);
 
+		static bool IsValidProducer(Actor producer) => producer != null && !producer.Disposed && producer.IsInWorld && !producer.IsDead;
+
 		public IEnumerable<Order> Order(World world, CPos cell, int2 worldPixel, MouseInput mi)
 		{
 			if (mi.Button == ActionButton && mi.Event == MouseInputEvent.Down)
 			{
-				if (!world.Map.Contains(cell) || !producer.IsInWorld || producer.IsDead)
+				if (!world.Map.Contains(cell) || !IsValidProducer(producer))
 				{
 					world.CancelInputMode();
 					return [];
@@ -59,7 +61,7 @@ namespace OpenRA.Mods.Common.Orders
 
 		public void Tick(World world)
 		{
-			if (!producer.IsInWorld || producer.IsDead || (world.LocalPlayer != null && world.LocalPlayer.WinState != WinState.Undefined))
+			if (!IsValidProducer(producer) || (world.LocalPlayer != null && world.LocalPlayer.WinState != WinState.Undefined))
 				world.CancelInputMode();
 		}
 
@@ -67,7 +69,7 @@ namespace OpenRA.Mods.Common.Orders
 
 		public IEnumerable<IRenderable> RenderAboveShroud(WorldRenderer wr, World world)
 		{
-			if (!producer.IsInWorld || producer.IsDead)
+			if (!IsValidProducer(producer))
 				yield break;
 
 			var mouseCell = wr.Viewport.ViewToWorld(Viewport.LastMousePos);

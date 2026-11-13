@@ -46,7 +46,7 @@ namespace OpenRA.Mods.Common.Widgets
 		const int QueueButtonSpacing = 4;
 		const int QueueButtonCount = 6;
 		const int TotalQueuePanelHeight = QueueButtonCount * QueueButtonHeight + (QueueButtonCount - 1) * QueueButtonSpacing;
-		const int QueuePanelMargin = 4;
+		const int QueuePanelMargin = 8;
 
 		public enum ReadyTextStyleOptions { Solid, AlternatingColor, Blinking }
 		public readonly ReadyTextStyleOptions ReadyTextStyle = ReadyTextStyleOptions.AlternatingColor;
@@ -131,6 +131,22 @@ namespace OpenRA.Mods.Common.Widgets
 		ProductionIcon selectedIcon;
 		QueueButtonType? pressedQueueButton;
 		SpriteFont boldFont;
+
+		public override bool EventBoundsContains(int2 location)
+		{
+			if (selectedIcon != null && GetQueuePanelRect().Contains(location))
+				return true;
+
+			foreach (var rect in icons.Keys)
+				if (rect.Contains(location))
+					return true;
+
+			foreach (var child in Children)
+				if (child.IsVisible() && child.EventBoundsContains(location))
+					return true;
+
+			return false;
+		}
 
 		public override Rectangle EventBounds
 		{
@@ -267,7 +283,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			TotalIconCount = AllBuildables.Count();
 
-			if (CurrentQueue != null && !CurrentQueue.Actor.IsInWorld)
+			if (CurrentQueue != null && (CurrentQueue.Actor == null || CurrentQueue.Actor.Disposed || !CurrentQueue.Actor.IsInWorld))
 				CurrentQueue = null;
 
 			if (CurrentQueue != null)
@@ -308,10 +324,24 @@ namespace OpenRA.Mods.Common.Widgets
 
 		Rectangle GetQueuePanelRect()
 		{
-			var parentBounds = Parent != null ? Parent.RenderBounds : RenderBounds;
+			var anchorX = RenderBounds.X;
+			var anchorY = RenderBounds.Y;
 
-			var panelX = parentBounds.X - QueueButtonWidth - QueuePanelMargin;
-			var panelY = parentBounds.Y + 4;
+			// In RA, D2K, and TS, ProductionPalette sits inside a narrow SIDEBAR_PRODUCTION container.
+			// In C&C, it is parented to fullscreen PLAYER_WIDGETS (Bounds 0,0,0,0), so anchor beside PRODUCTION_BACKGROUND.
+			if (Parent != null && Parent.RenderBounds.X > 0 && Parent.RenderBounds.Width > 0 && Parent.RenderBounds.Width < Game.Renderer.Resolution.Width / 2)
+			{
+				anchorX = Parent.RenderBounds.X;
+				anchorY = Parent.RenderBounds.Y;
+			}
+			else if (Parent?.GetOrNull("PRODUCTION_BACKGROUND") is Widget prodBg && prodBg.RenderBounds.X > 0)
+			{
+				anchorX = Math.Min(anchorX, prodBg.RenderBounds.X);
+				anchorY = Math.Min(anchorY, prodBg.RenderBounds.Y);
+			}
+
+			var panelX = anchorX - QueueButtonWidth - QueuePanelMargin;
+			var panelY = anchorY + 4;
 
 			if (panelX < 0)
 				panelX = 0;
@@ -329,9 +359,11 @@ namespace OpenRA.Mods.Common.Widgets
 			return new Rectangle(panel.X, panel.Y + index * (QueueButtonHeight + QueueButtonSpacing), panel.Width, QueueButtonHeight);
 		}
 
+		static bool IsValidActor(Actor a) => a != null && !a.Disposed && a.IsInWorld && !a.IsDead;
+
 		Actor GetRallyProducer()
 		{
-			var selectedBuilding = World.Selection.Actors.FirstOrDefault(a => a.Owner == World.LocalPlayer && a.TraitOrDefault<RallyPoint>() != null);
+			var selectedBuilding = World.Selection.Actors.FirstOrDefault(a => IsValidActor(a) && a.Owner == World.LocalPlayer && a.TraitOrDefault<RallyPoint>() != null);
 			if (selectedBuilding != null)
 				return selectedBuilding;
 
@@ -339,7 +371,7 @@ namespace OpenRA.Mods.Common.Widgets
 				return null;
 
 			var producer = CurrentQueue.MostLikelyProducer();
-			return producer.Trait != null ? producer.Actor : null;
+			return producer.Trait != null && IsValidActor(producer.Actor) ? producer.Actor : null;
 		}
 
 		void HandleQueueButtonClick(QueueButtonType type)
@@ -443,8 +475,8 @@ namespace OpenRA.Mods.Common.Widgets
 				case QueueButtonType.SetRallyPoint:
 				{
 					var rallyProducer = GetRallyProducer();
-					var rp = rallyProducer?.TraitOrDefault<RallyPoint>();
-					if (rallyProducer != null && rp != null)
+					var rp = IsValidActor(rallyProducer) ? rallyProducer.TraitOrDefault<RallyPoint>() : null;
+					if (rp != null)
 					{
 						Game.Sound.PlayNotification(World.Map.Rules, null, "Sounds", ClickSound, null);
 						if (World.OrderGenerator is SetRallyPointOrderGenerator)
@@ -519,6 +551,7 @@ namespace OpenRA.Mods.Common.Widgets
 					ScrollUp();
 					Ui.ResetTooltips();
 					Game.Sound.PlayNotification(World.Map.Rules, World.LocalPlayer, "Sounds", ClickSound, null);
+					return true;
 				}
 			}
 
@@ -711,7 +744,7 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var facility = CurrentQueue.MostLikelyProducer().Actor;
 
-			if (facility == null || facility.OccupiesSpace == null)
+			if (!IsValidActor(facility) || facility.OccupiesSpace == null)
 				return true;
 
 			if (selection.Actors.Count == 1 && selection.Contains(facility))
@@ -725,6 +758,13 @@ namespace OpenRA.Mods.Common.Widgets
 
 		void UpdateCachedProductionIconOverlays()
 		{
+			if (CurrentQueue?.Actor == null || CurrentQueue.Actor.Disposed)
+			{
+				cachedQueueOwner = null;
+				pios = [];
+				return;
+			}
+
 			cachedQueueOwner = CurrentQueue.Actor.Owner;
 			pios = cachedQueueOwner.PlayerActor.TraitsImplementing<IProductionIconOverlay>().ToArray();
 		}
@@ -733,7 +773,7 @@ namespace OpenRA.Mods.Common.Widgets
 		{
 			icons = [];
 			var producer = CurrentQueue != null ? CurrentQueue.MostLikelyProducer() : default;
-			if (CurrentQueue == null || producer.Trait == null)
+			if (CurrentQueue == null || producer.Trait == null || producer.Actor == null || producer.Actor.Disposed)
 			{
 				if (DisplayedIconCount != 0)
 				{
@@ -893,31 +933,46 @@ namespace OpenRA.Mods.Common.Widgets
 					Game.Renderer.RgbaColorRenderer.DrawRect(selTl, selBr, 2, Color.Gold);
 				}
 
+				var factionSuffix = ResolveFactionSuffix();
+				var panelBackground = ResolveFirstCollection(
+					factionSuffix != null ? "panel-black-" + factionSuffix : null,
+					"dialog4",
+					"panel-black");
+				var buttonImage = ResolveFirstCollection(
+					factionSuffix != null ? "sidebar-button-" + factionSuffix : null,
+					"sidebar-button",
+					factionSuffix != null ? "button-" + factionSuffix : null,
+					"button") ?? "button";
+
 				var panelRect = GetQueuePanelRect();
-				var bgRect = new Rectangle(panelRect.X - 2, panelRect.Y - 2, panelRect.Width + 4, panelRect.Height + 4);
-				WidgetUtils.FillRectWithColor(bgRect, Color.FromArgb(190, 15, 15, 20));
-				Game.Renderer.RgbaColorRenderer.DrawRect(
-					new Vector3(bgRect.Left, bgRect.Top, 0),
-					new Vector3(bgRect.Right, bgRect.Bottom, 0),
-					1, Color.FromArgb(140, 70, 70, 75));
+				var bgPad = panelBackground == "dialog4" ? 4 : 3;
+				var bgRect = new Rectangle(panelRect.X - bgPad, panelRect.Y - bgPad, panelRect.Width + 2 * bgPad, panelRect.Height + 2 * bgPad);
+				if (panelBackground != null)
+					WidgetUtils.DrawPanel(panelBackground, bgRect);
+				else
+				{
+					WidgetUtils.FillRectWithColor(bgRect, Color.FromArgb(190, 15, 15, 20));
+					Game.Renderer.RgbaColorRenderer.DrawRect(
+						new Vector3(bgRect.Left, bgRect.Top, 0),
+						new Vector3(bgRect.Right, bgRect.Bottom, 0),
+						1, Color.FromArgb(140, 70, 70, 75));
+				}
 
 				var queuedItems = CurrentQueue.AllQueued().Where(a => a.Item == selectedIcon.Name).ToList();
 				var firstItem = queuedItems.FirstOrDefault();
 				var isPaused = firstItem != null && firstItem.Paused;
 
 				var rallyProducer = GetRallyProducer();
-				var hasRallyPoint = rallyProducer != null && rallyProducer.TraitOrDefault<RallyPoint>() != null;
+				var hasRallyPoint = IsValidActor(rallyProducer) && rallyProducer.TraitOrDefault<RallyPoint>() != null;
 				var isRallyActive = World.OrderGenerator is SetRallyPointOrderGenerator;
 
 				var font = boldFont ?? overlayFont;
-				var faction = World.LocalPlayer?.Faction.InternalName ?? "allies";
-				var sidebarBtnBase = "sidebar-button-" + faction;
-				var buttonImage = ChromeProvider.Collections.ContainsKey(sidebarBtnBase)
-					? sidebarBtnBase
-					: (ChromeProvider.Collections.ContainsKey("sidebar-button") ? "sidebar-button" : "button");
-
-				var textColorNormal = Color.FromArgb(235, 235, 235);
-				var textColorDisabled = Color.FromArgb(120, 120, 120);
+				var visualHeight = ChromeMetrics.Get<int>("ButtonDepth");
+				var textColorNormal = ChromeMetrics.Get<Color>("ButtonTextColor");
+				var textColorDisabled = ChromeMetrics.Get<Color>("ButtonTextColorDisabled");
+				var textColorHighlight = Color.FromArgb(255, 220, 90);
+				var textShadowColor = ChromeMetrics.Get<Color>("ButtonTextContrastColorDark");
+				var iconShadowColor = Color.FromArgb(180, textShadowColor);
 
 				for (var i = 0; i < QueueButtonCount; i++)
 				{
@@ -952,8 +1007,8 @@ namespace OpenRA.Mods.Common.Widgets
 
 					ButtonWidget.DrawBackground(buttonImage, btnRect, disabled, isPressed || highlighted, false, highlighted);
 
-					var contentOffset = (isPressed || highlighted) ? new Vector2(1, 1) : Vector2.Zero;
-					var textColor = disabled ? textColorDisabled : (highlighted ? Color.FromArgb(255, 220, 90) : textColorNormal);
+					var contentOffset = (isPressed || highlighted) ? new Vector2(visualHeight, visualHeight) : Vector2.Zero;
+					var textColor = disabled ? textColorDisabled : (highlighted ? textColorHighlight : textColorNormal);
 
 					switch (btnType)
 					{
@@ -964,7 +1019,7 @@ namespace OpenRA.Mods.Common.Widgets
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 
@@ -975,7 +1030,7 @@ namespace OpenRA.Mods.Common.Widgets
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 
@@ -986,7 +1041,7 @@ namespace OpenRA.Mods.Common.Widgets
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 
@@ -997,7 +1052,7 @@ namespace OpenRA.Mods.Common.Widgets
 							const float r = 7.5f;
 
 							// Shadow (1px offset)
-							DrawCircleWithSlash(cx + 1, cy + 1, r, 16, Color.FromArgb(180, Color.Black));
+							DrawCircleWithSlash(cx + 1, cy + 1, r, 16, iconShadowColor);
 
 							// Foreground
 							DrawCircleWithSlash(cx, cy, r, 16, textColor);
@@ -1010,7 +1065,7 @@ namespace OpenRA.Mods.Common.Widgets
 							var cy = btnRect.Y + btnRect.Height / 2f + contentOffset.Y;
 
 							// Shadow (1px offset)
-							DrawFlagIcon(cx + 1, cy + 1, Color.FromArgb(180, Color.Black));
+							DrawFlagIcon(cx + 1, cy + 1, iconShadowColor);
 
 							// Foreground
 							DrawFlagIcon(cx, cy, textColor);
@@ -1024,12 +1079,34 @@ namespace OpenRA.Mods.Common.Widgets
 							var textPos = new Vector2(
 								btnRect.X + (btnRect.Width - textSize.X) / 2f,
 								btnRect.Y + (btnRect.Height - textSize.Y) / 2f) + contentOffset;
-							font.DrawTextWithShadow(text, textPos, textColor, Color.Black, 1);
+							font.DrawTextWithShadow(text, textPos, textColor, textShadowColor, 1);
 							break;
 						}
 					}
 				}
 			}
+		}
+
+		string ResolveFactionSuffix()
+		{
+			var faction = World.LocalPlayer?.Faction.InternalName;
+			if (string.IsNullOrEmpty(faction))
+				return null;
+
+			return ChromeMetrics.TryGet<string>($"FactionSuffix-{faction}", out var mapped)
+				? mapped
+				: faction;
+		}
+
+		static string ResolveFirstCollection(params string[] candidates)
+		{
+			foreach (var candidate in candidates)
+			{
+				if (!string.IsNullOrEmpty(candidate) && ChromeProvider.Collections.ContainsKey(candidate))
+					return candidate;
+			}
+
+			return null;
 		}
 
 		static void DrawCircleWithSlash(float cx, float cy, float r, int segments, Color color)

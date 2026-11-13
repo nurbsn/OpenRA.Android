@@ -236,6 +236,18 @@ namespace OpenRA.Android
 			catch (Exception ex)
 			{
 				Console.WriteLine($"[OpenRA.Android] Critical game error in RunManagedGame: {ex}");
+				try
+				{
+					OpenRA.Log.Write("exception", $"Unhandled exception on Android: {ex}");
+				}
+				catch
+				{
+				}
+			}
+			finally
+			{
+				OpenRA.TouchInputAdapter.Instance.Reset();
+				OpenRA.Game.CloseServer();
 			}
 		}
 	}

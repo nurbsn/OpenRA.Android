@@ -85,6 +85,7 @@ namespace OpenRA.Platforms.Default
 						{
 							case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
 								device.HasInputFocus = false;
+								touchAdapter.Reset();
 								break;
 
 							case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
@@ -99,6 +100,7 @@ namespace OpenRA.Platforms.Default
 							case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_HIDDEN:
 							case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_MINIMIZED:
 								device.IsSuspended = true;
+								touchAdapter.Reset();
 								break;
 
 							case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_EXPOSED:

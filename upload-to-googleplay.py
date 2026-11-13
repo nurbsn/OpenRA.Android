@@ -176,11 +176,11 @@ def upload_bundle(aab_path=None, track='internal', status='completed', update_li
         release_notes = [
             {
                 'language': 'pl-PL',
-                'text': 'Wersja 1.0.9 wprowadza dotykowy panel zarządzania kolejką budowy (dodawanie +5, usuwanie -1, pauza/wznowienie, anulowanie wszystkich), dedykowany przycisk wyznaczania punktu zbiórki jednostek (Rally Point) ze wskaźnikiem celu na mapie oraz usprawnione zaznaczanie jednostek.'
+                'text': 'Wersja 1.0.10 naprawia blokowanie ramki zaznaczania obszarowego przy szybkim dotyku/przesuwaniu mapy, eliminuje awarię po sprzedaży budynku z aktywną kolejką lub celem zbiórki (Rally Point) oraz problem zawieszonego procesu/dźwięku po wyjściu z gry. Panel sterowania kolejką budowy działa teraz poprawnie obok menu budowy we wszystkich modach w dopasowanej kolorystyce, a menu Ustawienia zostało ujednolicone pomiędzy wszystkimi modami.'
             },
             {
                 'language': 'en-US',
-                'text': 'Version 1.0.9 introduces touch-friendly build queue management (+5 queue, -1 cancel, pause/resume, cancel all), a dedicated rally point button for production structures with a visual target line, and improved unit selection ergonomics.'
+                'text': 'Version 1.0.10 fixes sticky area selection box activation during quick touch panning, resolves a crash when selling buildings with active queues or rally point targeting, ensures clean process and audio shutdown on exit, positions the touch queue control panel beside the build palette with matching mod/faction themes across all mods, and unifies the Settings menu across all mods.'
             }
         ]
 

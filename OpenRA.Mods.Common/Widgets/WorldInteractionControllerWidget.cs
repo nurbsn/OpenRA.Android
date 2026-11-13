@@ -40,6 +40,20 @@ namespace OpenRA.Mods.Common.Widgets
 
 		bool IsValidDragbox => isDragging && (dragStart - mousePos).Length > Game.Settings.Game.SelectionDeadzone;
 
+		public override bool YieldMouseFocus(MouseInput mi)
+		{
+			isDragging = false;
+			return base.YieldMouseFocus(mi);
+		}
+
+		public override void Tick()
+		{
+			if (isDragging && (!HasMouseFocus || World.OrderGenerator is not UnitOrderGenerator))
+				isDragging = false;
+
+			base.Tick();
+		}
+
 		[ObjectCreator.UseCtor]
 		public WorldInteractionControllerWidget(World world, WorldRenderer worldRenderer)
 		{

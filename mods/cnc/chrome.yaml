@@ -362,6 +362,15 @@ panel-transparent-gdi:
 	PanelRegion: 257, 33, 0, 0, 30, 30, 0, 0
 	PanelSides: Edges
 
+dialog:
+	Inherits: panel-black
+
+dialog2:
+	Inherits: button
+
+dialog3:
+	Inherits: panel-gray
+
 shellmapborder:
 	Inherits: ^Chrome
 	PanelRegion: 129, 129, 32, 32, 62, 62, 32, 32

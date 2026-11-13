@@ -728,6 +728,7 @@ checkbox-player-stance-colors-container =
 checkbox-ui-feedback-container =
     .label = Show UI Feedback Notifications
     .tooltip = Show transient text notifications for UI events
+checkbox-pause-shellmap-container = Pause Menu Background
 
 checkbox-transients-container =
     .label = Show Game Event Notifications
@@ -799,6 +800,19 @@ button-panel-advanced = Advanced
 button-panel-language = Language
 button-close = Close
 button-mods-title = Mods
+
+## settings-language.yaml
+label-language-section-header = LANGUAGE & TRANSLATIONS
+label-select-language = Language:
+label-language-restart-info = Select the application language. Mod Manager, settings, and translated interface text will update to the selected language. Some changes may require restarting or switching mods.
+button-language-en = English
+button-language-pl = Polski
+button-language-de = Deutsch
+button-language-es = Español
+button-language-fr = Français
+button-language-pt = Português
+button-language-it = Italiano
+button-language-ru = Русский
 
 ## tooltips.yaml
 label-latency-tooltip-prefix = Latency:

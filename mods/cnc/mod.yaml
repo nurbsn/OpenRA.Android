@@ -132,13 +132,13 @@ ChromeLayout:
 	cnc|chrome/ingame-info-lobby-options.yaml
 	cnc|chrome/ingame-debuginfo.yaml
 	cnc|chrome/music.yaml
-	cnc|chrome/settings.yaml
-	cnc|chrome/settings-display.yaml
-	cnc|chrome/settings-gameplay.yaml
-	cnc|chrome/settings-audio.yaml
-	cnc|chrome/settings-input.yaml
-	cnc|chrome/settings-hotkeys.yaml
-	cnc|chrome/settings-advanced.yaml
+	common|chrome/settings.yaml
+	common|chrome/settings-display.yaml
+	common|chrome/settings-gameplay.yaml
+	common|chrome/settings-audio.yaml
+	common|chrome/settings-input.yaml
+	common|chrome/settings-hotkeys.yaml
+	common|chrome/settings-advanced.yaml
 	common|chrome/settings-language.yaml
 	cnc|chrome/credits.yaml
 	cnc|chrome/dialogs.yaml

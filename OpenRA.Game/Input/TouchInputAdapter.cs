@@ -22,6 +22,13 @@ namespace OpenRA
 
 		public static TouchInputAdapter Instance { get; } = new();
 
+		readonly Func<int2, bool> isUIInteraction;
+
+		public TouchInputAdapter(Func<int2, bool> isUIInteraction = null)
+		{
+			this.isUIInteraction = isUIInteraction ?? IsUIInteraction;
+		}
+
 		static bool IsUIInteraction(int2 pos)
 		{
 			if (Ui.CurrentWindow() != null)
@@ -57,7 +64,13 @@ namespace OpenRA
 				if (IsOverInteractiveWidget(w.Children[i], pos))
 					return true;
 
+			if (typeName == "ProductionPaletteWidget")
+				return w.EventBoundsContains(pos);
+
 			if (!w.EventBounds.Contains(pos))
+				return false;
+
+			if (w is InputWidget inputWidget && inputWidget.IsDisabled())
 				return false;
 
 			if (typeName.Contains("Button") ||
@@ -72,7 +85,7 @@ namespace OpenRA
 				typeName.Contains("Tabs"))
 				return true;
 
-			if (w.Id is "SIDEBAR_BACKGROUND_TOP" or "SIDEBAR_PRODUCTION" or "SIDEBAR_MONEYBIN" or "COMMAND_BAR" or "STANCE_BAR")
+			if (w.Id is "SIDEBAR_BACKGROUND_TOP" or "SIDEBAR_PRODUCTION" or "SIDEBAR_MONEYBIN")
 				return true;
 
 			return false;
@@ -138,10 +151,36 @@ namespace OpenRA
 				inputHandler.OnMouseInput(input);
 		}
 
+		void EnqueueActiveGestureUp()
+		{
+			if (gestureMode == GestureMode.BoxSelecting || gestureMode == GestureMode.DirectUIInteraction)
+				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
+			else if (gestureMode == GestureMode.SingleFingerPanning)
+				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Middle, previousSinglePanPos, int2.Zero, Modifiers.None, 0));
+			else if (gestureMode == GestureMode.TwoFingerGesture)
+				queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Middle, previousPanCenter, int2.Zero, Modifiers.None, 0));
+		}
+
+		public void Reset()
+		{
+			EnqueueActiveGestureUp();
+			gestureMode = GestureMode.None;
+			firstFingerId = null;
+			secondFingerId = null;
+		}
+
 		public void OnFingerDown(long fingerId, int2 pos)
 		{
 			if (gestureMode == GestureMode.None)
 			{
+				firstFingerId = null;
+				secondFingerId = null;
+			}
+			else if (firstFingerId == fingerId)
+			{
+				// Missed FINGERUP (e.g. system gesture / focus change): end the previous gesture before restarting.
+				EnqueueActiveGestureUp();
+				gestureMode = GestureMode.None;
 				firstFingerId = null;
 				secondFingerId = null;
 			}
@@ -154,7 +193,7 @@ namespace OpenRA
 				previousSinglePanPos = pos;
 				firstFingerDownTime = stopwatch.ElapsedMilliseconds;
 
-				if (IsUIInteraction(pos))
+				if (isUIInteraction(pos))
 				{
 					gestureMode = GestureMode.DirectUIInteraction;
 					queue.Enqueue(new MouseInput(MouseInputEvent.Move, MouseButton.None, pos, int2.Zero, Modifiers.None, 0));
@@ -167,14 +206,17 @@ namespace OpenRA
 			}
 			else if (secondFingerId == null || secondFingerId == fingerId)
 			{
+				if (gestureMode == GestureMode.TwoFingerGesture && secondFingerId == fingerId)
+				{
+					secondFingerPos = pos;
+					return;
+				}
+
 				secondFingerId = fingerId;
 				secondFingerPos = pos;
 
 				// Cancel any single finger gesture
-				if (gestureMode == GestureMode.BoxSelecting || gestureMode == GestureMode.DirectUIInteraction)
-					queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Left, firstFingerCurrentPos, int2.Zero, Modifiers.None, 0));
-				else if (gestureMode == GestureMode.SingleFingerPanning)
-					queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Middle, previousSinglePanPos, int2.Zero, Modifiers.None, 0));
+				EnqueueActiveGestureUp();
 
 				gestureMode = GestureMode.TwoFingerGesture;
 				previousPanCenter = (firstFingerCurrentPos + secondFingerPos) / 2;
@@ -271,14 +313,11 @@ namespace OpenRA
 			{
 				if (firstFingerId == fingerId || secondFingerId == fingerId)
 				{
-					queue.Enqueue(new MouseInput(MouseInputEvent.Up, MouseButton.Middle, previousPanCenter, int2.Zero, Modifiers.None, 0));
+					EnqueueActiveGestureUp();
 					gestureMode = GestureMode.None;
-				}
-
-				if (firstFingerId == fingerId)
 					firstFingerId = null;
-				else if (secondFingerId == fingerId)
 					secondFingerId = null;
+				}
 
 				return;
 			}

@@ -58,7 +58,7 @@ namespace OpenRA
 		public static Sound Sound;
 
 		public static string EngineVersion { get; private set; }
-		public const string AndroidVersion = "1.0.9";
+		public const string AndroidVersion = "1.0.10";
 		public static string AppVersion => $"{EngineVersion} (Android v{AndroidVersion})";
 		public static LocalPlayerProfile LocalPlayerProfile;
 
@@ -240,6 +240,8 @@ namespace OpenRA
 			if (OrderManager.GameStarted)
 				return;
 
+			TouchInputAdapter.Instance.Reset();
+			Ui.MouseFocusWidget?.YieldMouseFocus(default);
 			Ui.MouseFocusWidget = null;
 			Ui.KeyboardFocusWidget = null;
 
@@ -1053,27 +1055,48 @@ namespace OpenRA
 			}
 			finally
 			{
-				// Ensure that the active replay is properly saved
-				OrderManager?.Dispose();
+				// Ensure that the active replay is properly saved and all runtime resources
+				// (audio, graphics context, local server) are torn down even on fatal exceptions.
+				SafeCleanup(() => OrderManager?.Dispose());
 				OrderManager = null;
+				SafeCleanup(() => worldRenderer?.Dispose());
+				worldRenderer = null;
+				SafeCleanup(() => Cursor?.Dispose());
+				Cursor = null;
+				SafeCleanup(() => ModData?.Dispose());
+				ModData = null;
+				SafeCleanup(ChromeProvider.Deinitialize);
+
+				SafeCleanup(() => TouchInputAdapter.Instance.Reset());
+				SafeCleanup(CloseServer);
+
+				SafeCleanup(() => Sound?.Dispose());
+				Sound = null;
+				SafeCleanup(() => Renderer?.Dispose());
+				Renderer = null;
+
+				SafeCleanup(OnQuit);
 			}
 
-			worldRenderer?.Dispose();
-			worldRenderer = null;
-			Cursor?.Dispose();
-			Cursor = null;
-			ModData?.Dispose();
-			ModData = null;
-			ChromeProvider.Deinitialize();
-
-			Sound?.Dispose();
-			Sound = null;
-			Renderer?.Dispose();
-			Renderer = null;
-
-			OnQuit();
-
 			return state;
+		}
+
+		static void SafeCleanup(Action action)
+		{
+			try
+			{
+				action?.Invoke();
+			}
+			catch (Exception ex)
+			{
+				try
+				{
+					Log.Write("debug", $"Exception during Game.Run cleanup: {ex}");
+				}
+				catch
+				{
+				}
+			}
 		}
 
 		public static void Exit()
